@@ -1,0 +1,9 @@
+---
+id: academic_17
+genre: academic
+source: gfissore/arxiv-abstracts-2021::0704.2704
+license: research-use
+length: 279
+note: auto-selected abstract; top_category=astro-ph
+---
+AIM: We have recently developed a microscopic Monte Carlo approach to study surface chemistry on interstellar grains and the morphology of ice mantles. The method is designed to eliminate the problems inherent in the rate-equation formalism to surface chemistry. Here we report the first use of this method in a chemical model of cold interstellar cloud cores that includes both gas-phase and surface chemistry. The surface chemical network consists of a small number of diffusive reactions that can produce molecular oxygen, water, carbon dioxide, formaldehyde, methanol and assorted radicals. METHOD: The simulation is started by running a gas-phase model including accretion onto grains but no surface chemistry or evaporation. The starting surface consists of either flat or rough olivine. We introduce the surface chemistry of the three species H, O and CO in an iterative manner using our stochastic technique. Under the conditions of the simulation, only atomic hydrogen can evaporate to a significant extent. Although it has little effect on other gas-phase species, the evaporation of atomic hydrogen changes its gas-phase abundance, which in turn changes the flux of atomic hydrogen onto grains. The effect on the surface chemistry is treated until convergence occurs. We neglect all non-thermal desorptive processes. RESULTS: We determine the mantle abundances of assorted molecules as a function of time through 2x10^5 yr. Our method also allows determination of the abundance of each molecule in specific monolayers. The mantle results can be compared with observations of water, carbon dioxide, carbon monoxide, and methanol ices in the sources W33A and Elias 16. Other than a slight underproduction of mantle CO, our results are in very good agreement with observations.

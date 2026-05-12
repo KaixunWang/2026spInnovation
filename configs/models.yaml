@@ -1,0 +1,145 @@
+# Provider-agnostic model registry.
+# The framework routes each call to the appropriate provider based on the
+# `provider` field below; fill in the API keys in .env for those you want
+# to use. Unused entries are ignored.
+#
+# Each `model` entry has the shape:
+#   name          : unique ID used inside the codebase
+#   provider      : one of {openai, anthropic, deepseek, dashscope, zhipu, moonshot}
+#   model_id      : exact model name sent to the provider API
+#   role          : {generator, judge, coordinate_scorer, embedder}
+#   temperature   : default sampling temperature (can be overridden per call)
+#   max_tokens    : default max output tokens
+#   openai_create_extras : optional mapping merged into OpenAI SDK chat.completions.create(...)
+#                          (e.g. DeepSeek thinking toggle via extra_body)
+#
+# Families are grouped so that we can require generator-family ≠ judge-family
+# when assigning roles.
+
+families:
+  openai:     [gpt-4o, gpt-4o-mini, text-embedding-3-large, text-embedding-3-small]
+  anthropic:  [claude-3-5-sonnet-latest, claude-3-5-haiku-latest]
+  deepseek:   [deepseek-v4-pro]
+  dashscope:  [qwen-max, qwen-plus, qwen3.5-flash, text-embedding-v3]
+  zhipu:      [glm-4-plus]
+  moonshot:   [moonshot-v1-32k]
+
+models:
+  # --- Generators (produce the rewrites) ---
+  - name: gen_openai_mini
+    provider: openai
+    model_id: gpt-4o-mini
+    role: generator
+    temperature: 0.7
+    max_tokens: 600
+
+  - name: gen_qwen35_flash
+    provider: dashscope
+    model_id: qwen3.5-flash
+    role: generator
+    temperature: 0.7
+    max_tokens: 800
+
+  # Stronger Qwen arm (same DashScope key as gen_qwen35_flash).
+  - name: gen_qwen_max
+    provider: dashscope
+    model_id: qwen-max
+    role: generator
+    temperature: 0.7
+    max_tokens: 800
+
+  # Same proxy/key as gen_openai_mini; use for higher-quality generation arm.
+  - name: gen_openai_4o
+    provider: openai
+    model_id: gpt-4o
+    role: generator
+    temperature: 0.7
+    max_tokens: 600
+
+  - name: gen_anthropic_haiku
+    provider: anthropic
+    model_id: claude-3-5-haiku-latest
+    role: generator
+    temperature: 0.7
+    max_tokens: 600
+
+  - name: gen_deepseek_v4_pro
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    role: generator
+    temperature: 0.7
+    max_tokens: 800
+
+  # --- Judges (score the rewrites; MUST be different family from generator) ---
+  - name: judge_anthropic_sonnet
+    provider: anthropic
+    model_id: claude-3-5-sonnet-latest
+    role: judge
+    temperature: 0.0
+    max_tokens: 700
+
+  - name: judge_openai_4o
+    provider: openai
+    model_id: gpt-4o
+    role: judge
+    temperature: 0.0
+    max_tokens: 700
+
+  - name: judge_deepseek_v4_pro
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    role: judge
+    temperature: 0.0
+    max_tokens: 2048
+    # Rubric is a short JSON blob; disable V4 thinking so tokens stay in message.content.
+    openai_create_extras:
+      extra_body:
+        thinking:
+          type: "disabled"
+
+  # --- Coordinate scorer (rates source texts on S and R axes) ---
+  - name: coord_openai_mini
+    provider: openai
+    model_id: gpt-4o-mini
+    role: coordinate_scorer
+    temperature: 0.0
+    max_tokens: 200
+
+  - name: coord_deepseek_v4_pro
+    provider: deepseek
+    model_id: deepseek-v4-pro
+    role: coordinate_scorer
+    temperature: 0.0
+    max_tokens: 400
+
+  - name: coord_qwen35_flash
+    provider: dashscope
+    model_id: qwen3.5-flash
+    role: coordinate_scorer
+    temperature: 0.0
+    max_tokens: 400
+
+  # --- Embedder (for Space-L; pick a local HF model by default to avoid extra cost) ---
+  - name: embed_bge_large
+    provider: local
+    model_id: BAAI/bge-large-en-v1.5
+    role: embedder
+
+  - name: embed_openai_3_large
+    provider: openai
+    model_id: text-embedding-3-large
+    role: embedder
+
+# Role assignment for each experiment phase.
+# Order matters: the first entry is the "primary"; additional entries are
+# used for cross-family robustness (H7 & risk G mitigation).
+#
+# Cross-family judges (recommended): mix providers so aggregates are not single-vendor.
+roles:
+  # Generators: OpenAI. Judges: DeepSeek + OpenAI (distinct families).
+  # Set DEEPSEEK_API_KEY (+ DEEPSEEK_BASE_URL if needed). Coord/embedder unchanged.
+  # Still use ALLOW_SAME_FAMILY_COORD=1 if coord_scorer shares OpenAI family with generators.
+  generators:        [gen_openai_4o, gen_openai_mini]
+  judges:            [judge_deepseek_v4_pro, judge_openai_4o]
+  coordinate_scorer: coord_openai_mini
+  embedder:          embed_openai_3_large

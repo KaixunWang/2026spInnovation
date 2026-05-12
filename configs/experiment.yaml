@@ -1,0 +1,98 @@
+# Experiment parameters. Changing values here and re-running the pipeline is
+# idempotent thanks to the disk cache.
+
+seed: 42
+
+# --- Space-L reference corpus ---
+space_l:
+  n_ref_per_persona: 200       # texts per persona per generator
+  seed_topics_file: data/seed_topics.yaml
+  sbert_model: BAAI/bge-large-en-v1.5
+  pca_dims_sweep: [2, 3, 4]    # cumulative variance >= 80% picks default
+  default_pca_dim: 2
+
+# --- Coordinate scoring of source texts in Space-H ---
+# backend: llm (coordinate_scorer in models.yaml) | hf (deterministic HuggingFace)
+coord_scoring:
+  n_seeds: 2                   # repeats of scoring for stability; mean + sigma (LLM only)
+  temperature: 0.0
+  backend: hf
+  source_coords_path: data/source_coords.jsonl
+  hf:
+    axis_vectors_npz: data/axis_vectors.npz
+    formality_model: s-nlp/roberta-base-formality-ranker
+    emotion_model: j-hartmann/emotion-english-distilroberta-base
+    styledist_model: StyleDistance/styledistance
+
+# --- Coordinate diagnostics (run BEFORE ``main``; uses deterministic coords when backend: hf) ---
+coord_reliability:
+  # Legacy LLM dual-scorer list (unused when coord_scoring.backend is hf).
+  scorer_models:
+    - coord_deepseek_v4_pro
+    - coord_openai_mini
+  length_bin_edges: [0, 120, 180, 10000000]
+
+# --- Main experiment (T0/T1/T2/T3) ---
+main:
+  n_repeat: 3                  # repetitions per (source, target, condition, model)
+  conditions: [T0, T1, T2, T3]
+  temperature: 0.7
+  top_p: 0.95
+  length_ratio_min: 0.8
+  length_ratio_max: 1.2
+  h1_prereg:
+    primary_metric: creativity_auto
+    regression_subset: T3_main_metrics
+    vertex_d_quantile_band: [0.55, 0.85]
+    value_monotone_decline_from_d_quantile: 0.85
+    falsify_if:
+      quadratic_term_p_gt: 0.05
+      fitted_vertex_d_outside_sample_quantiles: [0.03, 0.97]
+
+# --- Mechanism experiment (M1/M2/M3) ---
+mechanism:
+  run_on_subset: high_d
+  high_d_quantile: 0.67
+  modes: [M0, M1, M2, M3]
+  n_repeat: 1
+  generator_model: gen_qwen35_flash
+
+# --- Multi-hop experiment ---
+multihop:
+  n_hops: 5
+  paths:                        # multiple persona orderings for path-dependence analysis
+    - [rational_conservative, emotional_adventurous, rational_adventurous, emotional_conservative, rational_conservative]
+    - [emotional_adventurous, rational_conservative, emotional_conservative, rational_adventurous, emotional_adventurous]
+  n_source_sample: 8            # sample 8 sources (2 per genre) to keep cost bounded
+  scope_note: >
+    Conclusions are scoped to these pre-registered persona paths only; they do not
+    generalise to arbitrary bridge sequences without additional path sampling.
+  falsifiable_prediction:
+    id: bridge_high_conflict_better_than_direct_t3
+    statement: >
+      Paths that include one intermediate high-conflict persona hop should yield
+      higher final creativity than direct one-shot T3 at matched start/end persona classes.
+    test_plan: >
+      Compare final-hop creativity for path records against direct T3 records within
+      matched genre and approximate d bins; reject prediction if mean delta <= 0.
+
+# --- Smoke test ---
+smoke:
+  n_sources: 2                  # 2 sources
+  conditions: [T1, T3]          # skip T0/T2 in smoke
+  n_repeat: 1
+  generator_role_index: 0       # primary generator only
+  skip_judge: false
+  skip_space_l: true            # skip expensive Space-L build
+
+# --- Scoring / judging ---
+scoring:
+  pairwise_enabled: true
+  absolute_enabled: true
+  n_judges: 2
+  shuffle_options: true
+
+# --- Budget guard ---
+budget:
+  max_api_calls_per_run: 250000
+  max_tokens_per_run: 50000000

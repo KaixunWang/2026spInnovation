@@ -1,0 +1,9 @@
+---
+id: poetry_08
+genre: poetry
+source: merve/poetry::unknown_title
+license: research-use
+length: 122
+note: auto-selected poem window; theme=unknown_theme
+---
+Stella is sick, and in that sick-bed lies Sweetness, that breathes and pants as oft as she; And grace, sick too, such fine conclusions tries That sickness brags itself best graced to be. Beauty is sick, but sick in so fair guise That in that paleness beautys white we see; And joy, which is inseparate from these eyes, Stella now learns (strange case!) to weep in thee. Love moves thy pain, and like a faithful page, As thy looks stir, runs up and down, to make All folks prest at thy will thy pain to assuage; Nature with care sweats for her darlings sake, Knowing worlds pass, ere she enough can find Of such heaven stuff, to clothe so heavenly mind.

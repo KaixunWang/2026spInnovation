@@ -1,0 +1,2 @@
+metric,n_T3_main,d_coef,d2_coef,d2_pvalue,fitted_vertex_d,empirical_d_q03,empirical_d_q_lo_band,empirical_d_q_hi_band,empirical_d_q97,vertex_inside_prereg_band,vertex_inside_sample_mass,falsify_quadratic_p_gt_threshold,falsify_vertex_outside_03_97,pooled_main_d2_p
+creativity_auto,1440,0.025026620005860735,-0.026558096975916046,0.2914218676759468,0.47116741889593755,0.12747548783981963,0.5147815070493499,0.7905694150420948,0.9055385138137416,False,True,True,False,1.4450789274706196e-06

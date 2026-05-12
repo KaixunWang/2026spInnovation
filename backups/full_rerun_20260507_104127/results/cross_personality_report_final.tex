@@ -1,0 +1,439 @@
+\documentclass[sigconf,nonacm]{acmart}
+
+\settopmatter{printacmref=false}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{array}
+
+\graphicspath{{figures/}{results/figures/}}
+
+\newcommand{\missingfigure}[2]{%
+  \fbox{%
+    \begin{minipage}[c][0.25\textheight][c]{0.92\linewidth}
+      \centering
+      Figure asset not found: \texttt{\detokenize{#1}}\\[0.5em]
+      #2
+    \end{minipage}%
+  }%
+}
+\newcommand{\maybeincludegraphics}[2]{%
+  \IfFileExists{#1}{%
+    \includegraphics[width=\linewidth]{#1}%
+  }{%
+    \IfFileExists{results/#1}{%
+      \includegraphics[width=\linewidth]{results/#1}%
+    }{%
+      \missingfigure{#1}{#2}%
+    }%
+  }%
+}
+
+\title{Conflict-Driven Creativity in AI Cross-Personality Rewriting}
+
+\author{Kaixun Wang}
+\affiliation{
+  \institution{Southern University of Science and Technology}
+  \city{Shenzhen}
+  \country{China}
+}
+
+\begin{document}
+
+\begin{abstract}
+This report summarizes the currently available experimental results for AI cross-personality rewriting.
+The report follows the structure of the provided \texttt{template.tex}, but replaces the wage-prediction task with a controlled rewriting experiment grounded in the project design documents.
+The evidence is limited to files currently present under \texttt{results/} and \texttt{data/generated/}; no additional experiment run is assumed.
+The current flattened analysis table contains 4296 rows: 2280 main-arm metric rows, 1920 mechanism rows, and 96 multihop rows, covering 60 source texts across academic, essay, narrative, and poetry genres.
+The main arm uses four conditions: identity (T0), same-personality rewriting (T1), random-personality rewriting (T2), and directed cross-personality rewriting (T3).
+All rows have non-missing automatic creativity and NLI entailment values, and all rows also contain merged LLM-judge fields.
+The strongest result is that rewriting substantially improves automatic creativity over identity.
+Within the pooled current analysis, the quadratic conflict term is negative for automatic creativity ($\beta_{d^2}=-0.0676$, $p=1.88\times10^{-5}$), with stronger negative curvature for value and coherence.
+However, the pre-registered T3-only H1 check is not supported: its fitted vertex lies outside the empirical conflict range and the T3-only quadratic term is not significant.
+Thus the current evidence supports a cautious claim: conflict is structured and directionally meaningful, but the strongest verified effect is a novelty--value trade-off rather than an unqualified T3 treatment advantage.
+\end{abstract}
+
+\keywords{AI writing, persona prompting, creativity evaluation, style transfer, LLM-as-judge, mixed-effects regression}
+
+\maketitle
+
+\section{Scope of This Report}
+
+This report is a status-faithful analysis of the current result directory.
+It uses the experimental logic from \texttt{docs/experiment\_workflow.md} and the measurement definitions from \texttt{docs/rubrics.md}, but the numerical claims are restricted to the present files:
+\texttt{results/flat.csv}, \texttt{results/regression\_diagnostics.json}, and CSV tables in \texttt{results/tables/}.
+The current \texttt{results/figures/} directory contains no PNG assets, so all figure panels are written with safe placeholders that will automatically render real plots if the expected files are regenerated.
+
+\paragraph{Important scope note.}
+The current \texttt{data/generated/main\_metrics.jsonl} contains 2280 rows and all rows have \texttt{target\_sampling=discrete}.
+Therefore this report should be read as the report for the currently analysed discrete-persona result set, not as a completed continuous-target report.
+
+\section{Experimental Design}
+
+\subsection{Persona Space and Conflict}
+
+The project defines an interpretable two-dimensional Space-H.
+The first axis, $S$, represents a rational--emotional contrast inspired by dual-process theory.
+The second axis, $R$, represents a conservative--adventurous register-risk contrast.
+Each source text receives a coordinate in this plane, and each target persona is also represented by a coordinate.
+Conflict intensity is the scalar distance $d_H$ between source and target, while directional conflict is $\Delta_H=(\Delta S,\Delta R)$.
+
+\subsection{Four-Arm Main Experiment}
+
+The main arm follows the quasi-causal structure described in the workflow document.
+T0 is the identity baseline.
+T1 rewrites the text using the nearest persona and estimates the pure rewrite effect.
+T2 rewrites under a random persona and acts as a placebo for arbitrary stylistic change.
+T3 rewrites toward a directed cross-personality target.
+The current main metric file has 60 sources, two generator roles, and 2280 analysed rows.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Source file & Rows & T0 & T1/T2 & T3 or modes \\
+\midrule
+\texttt{main\_metrics} & 2280 & 120 & 360 / 360 & 1440 T3 \\
+\texttt{mechanism\_metrics} & 1920 & -- & -- & 480 each M0--M3 \\
+\texttt{multihop\_metrics} & 96 & -- & -- & 96 hop rows \\
+\midrule
+Total & 4296 & 120 & 720 & 3456 non-identity rows \\
+\bottomrule
+\end{tabular}
+\caption{Current flattened result coverage from \texttt{results/flat.csv}. Multihop rows do not use T0--T3 condition labels in the flattened table.}
+\label{tab:coverage}
+\end{table}
+
+\section{Measurement Model}
+
+The primary automatic dependent variable is
+\[
+  C_{\mathrm{auto}} = N_{\mathrm{auto}} \times V_{\mathrm{auto}}.
+\]
+The novelty term combines genre-normalised distinct-2, novel n-gram ratio, and embedding-distance signals when available.
+The value term is the arithmetic mean of an NLI entailment proxy and a bounded coherence score derived from perplexity:
+\[
+  V_{\mathrm{auto}} = \frac{Fidelity_{\mathrm{NLI}} + Coherence_{\mathrm{auto}}}{2}.
+\]
+The project documentation explicitly treats LLM judge scores as validity and sensitivity evidence, not as a replacement for the automatic primary outcome.
+In the current run, judge fields are merged for all 4296 rows.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Condition & Creativity & Novelty & Value & NLI & Coherence \\
+\midrule
+T0 & 0.2317 & 0.3334 & 0.7044 & 0.7486 & 0.6602 \\
+T1 & 0.3191 & 0.4041 & 0.7918 & 0.8066 & 0.7770 \\
+T2 & 0.3097 & 0.4186 & 0.7418 & 0.7143 & 0.7693 \\
+T3 & 0.3124 & 0.4232 & 0.7409 & 0.7144 & 0.7675 \\
+\midrule
+M0 & 0.2937 & 0.4136 & 0.7143 & 0.6230 & 0.8055 \\
+M1 & 0.2937 & 0.4167 & 0.7086 & 0.6100 & 0.8073 \\
+M2 & 0.3048 & 0.4371 & 0.7019 & 0.5993 & 0.8046 \\
+M3 & 0.2926 & 0.4049 & 0.7272 & 0.6498 & 0.8045 \\
+\bottomrule
+\end{tabular}
+\caption{Mean automatic metrics by condition from \texttt{results/flat.csv}. T1 has the highest main-arm mean creativity; T3 is slightly above T2 but below T1 in aggregate.}
+\label{tab:condition}
+\end{table}
+
+\section{Descriptive Results}
+
+\subsection{Genre-Level Patterns}
+
+Genre differences are substantial even after genre-normalised novelty is used.
+Essay and poetry have the highest mean creativity in the current flattened table, while narrative is lowest.
+This is not solely a novelty effect: value, NLI, and coherence differ sharply by genre as well.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Genre & Creativity & Novelty & Value & NLI & Coherence \\
+\midrule
+Academic & 0.2778 & 0.4119 & 0.6832 & 0.5958 & 0.7705 \\
+Essay & 0.3503 & 0.4572 & 0.7702 & 0.7657 & 0.7747 \\
+Narrative & 0.2635 & 0.3698 & 0.7151 & 0.5318 & 0.8985 \\
+Poetry & 0.3405 & 0.4377 & 0.7838 & 0.8996 & 0.6679 \\
+\bottomrule
+\end{tabular}
+\caption{Genre-level metric means from \texttt{results/flat.csv}. Poetry has high NLI but lower coherence; narrative has the lowest creativity and NLI in the current run.}
+\label{tab:genre}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/inverted_u_creativity_auto.png}{Regenerate by running \texttt{python -m src.analyze --metric creativity\_auto}.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/directional_field_creativity_auto.png}{Regenerate by running \texttt{python -m src.analyze --metric creativity\_auto}.}
+\end{minipage}
+\caption{Expected analysis figures. The current result directory contains no PNG files, so placeholders are shown until figures are regenerated.}
+\label{fig:expected}
+\end{figure*}
+
+\section{Conflict Intensity}
+
+\subsection{Pooled Quadratic Results}
+
+The pooled current regression over all loaded metric files shows a negative quadratic term for automatic creativity.
+The same sign is robust for geometric creativity and for the winsorised creativity sensitivity run.
+The decomposition indicates that this curvature is mainly associated with value and coherence loss at higher conflict; novelty alone does not show a significant negative quadratic in the non-winsorised model.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Metric & $n$ & $\beta_{d^2}$ & $p(d^2)$ \\
+\midrule
+Creativity auto & 4200 & -0.0676 & $1.88{\times}10^{-5}$ \\
+Creativity geom & 4200 & -0.0680 & $5.77{\times}10^{-4}$ \\
+Value auto & 4200 & -0.1816 & $2.10{\times}10^{-7}$ \\
+Coherence auto & 4200 & -0.1608 & $3.25{\times}10^{-6}$ \\
+Novelty auto & 4200 & 0.0198 & 0.1615 \\
+\bottomrule
+\end{tabular}
+\caption{Key quadratic terms from \texttt{results/regression\_diagnostics.json}. These regressions are pooled over the current loaded metrics files, not only the pre-registered T3 main subset.}
+\label{tab:quadratic}
+\end{table}
+
+\subsection{Pre-Registered H1 Check}
+
+The pre-registered T3-only H1 diagnostic is weaker than the pooled result.
+For T3 rows in the main metric file, the fitted vertex is $d=-0.516$, outside the empirical T3 conflict range.
+The T3-only quadratic term is not significant ($p=0.560$), and both pre-registration falsification flags are triggered.
+This means the strongest honest conclusion is not that the pre-registered T3-only inverted-U has been confirmed.
+Instead, the current evidence shows a broader pooled concavity in creativity and strong value/coherence collapse at high conflict.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+H1 diagnostic & Value \\
+\midrule
+T3 main rows & 1440 \\
+$\beta_d$ & -0.0167 \\
+$\beta_{d^2}$ & -0.0161 \\
+$p(d^2)$ & 0.5599 \\
+Fitted vertex $d$ & -0.5164 \\
+Empirical $d$ q03 / q97 & 0.1275 / 0.9055 \\
+Vertex inside pre-reg band & False \\
+Vertex inside sample mass & False \\
+\bottomrule
+\end{tabular}
+\caption{Pre-registered H1 diagnostic from \texttt{results/tables/h1\_preregistration\_check.csv}.}
+\label{tab:h1}
+\end{table}
+
+\section{Causal Contrasts}
+
+The bucketed causal contrast table compares T3 to T1 and T2 within conflict bins.
+The current evidence is small and mixed.
+In the low bin, T3 is slightly below T1 but above T2.
+In the mid bin, T3 is above T2 by about 0.0021.
+In the high bin, T3 is below T2 by about 0.0355.
+This pattern does not support a simple statement that directed conflict always improves creativity.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Bucket & $n_{T1}$ & $n_{T2}$ & $n_{T3}$ & T3--T1 & T3--T2 \\
+\midrule
+Low & 360 & 212 & 786 & -0.0009 & 0.0075 \\
+Mid & 0 & 128 & 564 & -- & 0.0021 \\
+High & 0 & 20 & 90 & -- & -0.0355 \\
+\bottomrule
+\end{tabular}
+\caption{Bucketed causal contrasts from \texttt{results/tables/causal\_creativity\_auto.csv}. Missing T1 entries reflect absent T1 rows in the corresponding conflict bucket.}
+\label{tab:causal}
+\end{table}
+
+\section{Conflict Direction}
+
+Directional regression checks whether the vector components of conflict matter beyond scalar distance.
+For automatic creativity, $\Delta S$ is positive and significant, $\Delta R$ is not significant on its own, $\Delta R^2$ is significantly negative, and the interaction $\Delta S\Delta R$ is strongly positive.
+The absolute magnitude term is not significant after the directional terms enter.
+This suggests that the geometry of conflict is more informative than distance alone.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Term & Coefficient & $p$ \\
+\midrule
+$\Delta S$ & 0.0065 & $3.15{\times}10^{-8}$ \\
+$\Delta R$ & 0.0008 & 0.3951 \\
+$\Delta S^2$ & -0.0006 & 0.8067 \\
+$\Delta R^2$ & -0.0051 & 0.0194 \\
+$\Delta S\Delta R$ & 0.0067 & $7.50{\times}10^{-25}$ \\
+$|\Delta|$ & -0.0002 & 0.9767 \\
+\bottomrule
+\end{tabular}
+\caption{Directional creativity regression from \texttt{results/regression\_diagnostics.json}.}
+\label{tab:direction}
+\end{table}
+
+\section{Mechanism and Multihop Branches}
+
+\subsection{Mechanism Experiment}
+
+The mechanism branch is present in the current metrics table.
+At the high-conflict threshold $d=0.7906$, M2 has the highest mean automatic creativity among M0--M3.
+This is consistent with the planned idea that a two-stage paraphrase-then-style pipeline can mitigate some high-conflict damage.
+The result should still be treated as suggestive, because this table is a mean contrast rather than a full causal model.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Mode & Mean creativity & Std. & Count \\
+\midrule
+M0 & 0.2908 & 0.0759 & 342 \\
+M1 & 0.2919 & 0.0806 & 342 \\
+M2 & 0.3067 & 0.0771 & 342 \\
+M3 & 0.2897 & 0.0774 & 342 \\
+Joint & 0.2930 & 0.0811 & 418 \\
+\bottomrule
+\end{tabular}
+\caption{High-conflict mechanism summary from \texttt{results/tables/mechanism\_creativity\_auto.csv}.}
+\label{tab:mechanism}
+\end{table}
+
+\subsection{Multihop Prediction Check}
+
+The multihop branch has a prediction-check table, but the evidence is heterogeneous.
+Essay and poetry mid-bin rows support the bridge-over-direct prediction, while academic rows do not.
+The table is therefore best reported as exploratory path-dependence evidence rather than a confirmed general effect.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrr}
+\toprule
+Genre & Bin & Multihop & Direct T3 & Delta \\
+\midrule
+Academic & Low & 0.2700 & 0.2994 & -0.0295 \\
+Academic & Mid & 0.2961 & 0.3004 & -0.0043 \\
+Academic & High & 0.2553 & 0.2737 & -0.0183 \\
+Essay & Mid & 0.4506 & 0.3517 & 0.0988 \\
+Narrative & High & 0.1710 & 0.2563 & -0.0853 \\
+Poetry & Mid & 0.4627 & 0.3606 & 0.1021 \\
+\bottomrule
+\end{tabular}
+\caption{Selected multihop contrasts from \texttt{results/tables/multihop\_prediction\_check.csv}. The full CSV contains all available genre-bin rows.}
+\label{tab:multihop}
+\end{table}
+
+\section{Judge Validity Evidence}
+
+The judge--automatic correlation matrix is available in \texttt{results/tables/judge\_auto\_validity\_correlation.csv}.
+Judge novelty correlates moderately with automatic novelty ($r=0.435$), but judge fidelity is negatively correlated with judge novelty ($r=-0.730$), reflecting the expected novelty--fidelity tension.
+Automatic creativity correlates with automatic novelty ($r=0.611$) and value ($r=0.685$), while its direct correlation with judge novelty is near zero ($r=0.016$).
+This supports the documentation's caution that LLM judge scores should be interpreted as validity evidence, not as a drop-in replacement for the primary automatic metric.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Pair & Pearson $r$ & Interpretation \\
+\midrule
+Judge novelty vs. auto novelty & 0.435 & moderate convergence \\
+Judge fidelity vs. judge novelty & -0.730 & strong trade-off \\
+Auto creativity vs. auto novelty & 0.611 & composite dependence \\
+Auto creativity vs. value auto & 0.685 & composite dependence \\
+Auto creativity vs. judge novelty & 0.016 & little direct alignment \\
+\bottomrule
+\end{tabular}
+\caption{Selected validity correlations from \texttt{results/tables/judge\_auto\_validity\_correlation.csv}.}
+\label{tab:judge}
+\end{table}
+
+\section{Coordinate Reliability}
+
+The coordinate reliability file currently contains 60 sources and compares two coordinate scorers.
+The summary rows report near-zero ICC values for both $S$ and $R$.
+This is a serious limitation for claims that depend on the absolute reliability of source coordinates.
+The analysis can still be useful as an internal geometry-based experiment, but any paper-style claim about Space-H should explicitly disclose the coordinate reliability weakness and avoid over-claiming the precision of $d_H$.
+
+\section{Limitations}
+
+First, the current report is based on existing result files only.
+It does not rerun missing figure generation, continuous-target generation, or additional metrics.
+Second, all currently analysed main rows in \texttt{main\_metrics.jsonl} use discrete target sampling; the continuous-target branch is not represented in the final metric table used here.
+Third, \texttt{results/figures/} is empty, so figures in this report are reproducible placeholders rather than verified image assets.
+Fourth, the H1 pre-registered T3-only check is not supported, even though pooled regressions show strong negative quadratic curvature.
+Finally, coordinate reliability is weak in the current file, which should temper claims about exact Space-H distances.
+
+\section{Reproducibility}
+
+The report was written against the following current artefacts:
+\begin{itemize}\itemsep2pt
+\item \texttt{results/flat.csv}: flattened analysis table with 4296 rows.
+\item \texttt{data/generated/main\_metrics.jsonl}: 2280 main-arm metric rows.
+\item \texttt{data/generated/mechanism\_metrics.jsonl}: 1920 mechanism metric rows.
+\item \texttt{data/generated/multihop\_metrics.jsonl}: 96 multihop metric rows.
+\item \texttt{results/regression\_diagnostics.json}: pooled and directional regression diagnostics.
+\item \texttt{results/tables/*.csv}: H1, causal, mechanism, multihop, judge-validity, and coordinate tables.
+\end{itemize}
+
+To regenerate missing plots from the current metrics files, run:
+\begin{verbatim}
+python -m src.analyze --metric creativity_auto
+\end{verbatim}
+If the intended final study is the continuous-target version, the required next step is to complete continuous generation, rerun metrics on that file, merge judge scores, and rerun analysis before replacing the numerical claims in this report.
+
+\section{Conclusion}
+
+The current results support a careful interpretation.
+Rewriting clearly improves automatic creativity over identity, and conflict geometry matters.
+The pooled regressions show a strong negative quadratic relationship between conflict and creativity, driven mainly by value and coherence decline at higher conflict.
+However, the pre-registered T3-only inverted-U diagnostic is not supported, and T3 does not dominate T1/T2 in simple aggregate means.
+The most defensible conclusion is therefore conditional: persona conflict can be productive in some regions and directions, but excessive or poorly aligned conflict damages value, and current evidence should not be framed as a universal T3 advantage.
+
+\begin{thebibliography}{9}
+\bibitem{kahneman}
+D.~Kahneman.
+\newblock \textit{Thinking, Fast and Slow}.
+\newblock Farrar, Straus and Giroux, 2011.
+
+\bibitem{boden}
+M.~Boden.
+\newblock \textit{The Creative Mind: Myths and Mechanisms}.
+\newblock Routledge, 2004.
+
+\bibitem{runco}
+M.~Runco and G.~Jaeger.
+\newblock The standard definition of creativity.
+\newblock \textit{Creativity Research Journal} 24, 1 (2012), 92--96.
+
+\bibitem{yerkes}
+R.~Yerkes and J.~Dodson.
+\newblock The relation of strength of stimulus to rapidity of habit-formation.
+\newblock \textit{Journal of Comparative Neurology and Psychology} 18 (1908), 459--482.
+
+\bibitem{shannon}
+C.~Shannon.
+\newblock A mathematical theory of communication.
+\newblock \textit{Bell System Technical Journal} 27 (1948), 379--423.
+\end{thebibliography}
+
+\end{document}

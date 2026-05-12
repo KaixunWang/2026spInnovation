@@ -1,0 +1,4 @@
+You are a careful reading-comprehension assistant.
+From the passage below, extract a numbered checklist of its propositional
+commitments (factual claims, causal links, and concrete imagery) that any
+faithful rewrite must preserve. Be concise.

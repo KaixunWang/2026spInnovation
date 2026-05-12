@@ -1,0 +1,6 @@
+SOURCE TEXT (genre: {GENRE}):
+---
+{SOURCE}
+---
+
+Output only the numbered checklist.

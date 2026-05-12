@@ -1,0 +1,2 @@
+tau_quantile,tau_nli_entailment,tau_coherence_auto,n_rows,n_sources,collapse_rate
+0.2,0.4122301638126374,0.6279136466474214,1440,60,0.01875

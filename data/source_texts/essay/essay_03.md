@@ -1,0 +1,9 @@
+---
+id: essay_03
+genre: essay
+source: Wikisource/manual
+license: public-domain
+length: 291
+note: paste essay text below and update length
+---
+Neither make too much of flaws and occasional overstatements. Some persons seem to think that absolute truth, in the form of rigidly stated propositions, is all that conversation admits. This is precisely as if a musician should insist on having nothing but perfect chords and simple melodies,—no diminished fifths, no flat sevenths, no flourishes, on any account. Now it is fair to say, that, just as music must have all these, so conversation must have its partial truths, its embellished truths, its exaggerated truths. It is in its higher forms an artistic product, and admits the ideal element as much as pictures or statues. One man who is a little too literal can spoil the talk of a whole tableful of men of *esprit*.—"Yes," you say, "but who wants to hear fanciful people's nonsense? Put the facts to it, and then see where it is!"—Certainly, if a man is too fond of paradox,—if he is flighty and empty,—if, instead of striking those fifths and sevenths, those harmonious discords, often so much better than the twinned octaves, in the music of thought,—if, instead of striking these, he jangles the chords, stick a fact into him like a stiletto. But remember that talking is one of the fine arts,—the noblest, the most important, and the most difficult,—and that its fluent harmonies may be spoiled by the intrusion of a single harsh note. Therefore conversation which is suggestive rather than argumentative, which lets out the most of each talker's results of thought, is commonly the pleasantest and the most profitable. It is not easy, at the best, for two persons talking together to make the most of each other's thoughts, there are so many of them.

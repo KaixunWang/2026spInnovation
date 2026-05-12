@@ -1,0 +1,5 @@
+metrics_file,generator_model,label,metric,n,fit_type,beta_d,beta_d2,p_d,p_d2,d_star,d2_significant_p05,error
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,main_qwen3_4b_metrics,creativity_auto,720,mixedlm_powell_reml1,0.570109737535966,-0.5924613390936039,0.00018775027458950034,2.8940077346222045e-05,0.4811366581388811,True,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,main_qwen3_8b_metrics,creativity_auto,720,mixedlm_powell_reml1,0.5374752942341536,-0.505237215756861,0.00026948429218143216,0.0002241422551542711,0.5319039032279115,True,
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,main_qwen3_14b_metrics,creativity_auto,720,mixedlm_powell_reml1,0.0018550528558768714,-0.05009881866571707,0.9901162204965781,0.7185246882232308,0.018513938105553532,False,
+main_metrics.jsonl,gen_openai_4o|gen_openai_mini,main_metrics,creativity_auto,1440,mixedlm_lbfgs_reml1,0.6123683957813912,-0.6180859646126742,1.3519513042638284e-08,6.950646017890456e-10,0.49537477862414664,True,

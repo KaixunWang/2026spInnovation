@@ -1,0 +1,5 @@
+generator_label,metrics_file,generator_model,n_T3,n_fit_creativity_auto,n_fit_creativity_judge,beta_d2_creativity_auto,p_d2_creativity_auto,sig_p05_creativity_auto,beta_d2_creativity_judge,p_d2_creativity_judge,sig_p05_creativity_judge,same_sign_beta_d2,both_sig_p05_d2,error
+Qwen3-4B,main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,720,720,720,-0.5924613390936039,2.8940077346222045e-05,True,-0.41678025941004104,0.18842631719541092,False,yes,False,
+Qwen3-8B,main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,720,720,720,-0.505237215756861,0.0002241422551542711,True,0.24203256604177686,0.5003047868942685,False,no,False,
+Qwen3-14B,main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,720,720,720,-0.05009881866571707,0.7185246882232308,False,0.19445443468752316,0.604286242426672,False,no,False,
+GPT-4o,main_metrics.jsonl,gen_openai_4o|gen_openai_mini,1440,1440,1440,-0.6180859646126742,6.950646017890456e-10,True,1.0068260207484871,1.7925387493719097e-05,True,no,True,

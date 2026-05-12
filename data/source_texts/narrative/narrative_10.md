@@ -1,0 +1,9 @@
+---
+id: narrative_10
+genre: narrative
+source: sanps/GutenbergFiction::unknown
+license: public-domain
+length: 297
+note: auto-selected paragraph window
+---
+IV. Mr. Ransom Waits V. In Corridor and in Room VI. The Lawyer VII. Rain VIII. Elimination IX. Hunter's Inn PART II.--THE CALL OF THE WATERFALL X. Two Doors XI. Half-Past One in the Morning XII. "Georgian" XIII. Where the Mill Stream Runs Fiercest XIV. A Detective's Work XV. Anitra XVI. "Love" XVII. "I Don't Hear" PART III.--MONEY XVIII. God's Forest, Then Man's XIX. In Mrs. Deo's Room XX. Between the Elderberry Bushes XXI. On the Cars XXII. A Suspicious Test XXIII. A Startling Decision XXIV. The Devil's Cauldron PART IV.--THE MAN OF MYSTERY XXV. Death Eddy XXVI. Hazen XXVII. She Speaks XXVIII. Fifteen Minutes XXIX. "There is One Way" XXX. Not Yet LIST OF ILLUSTRATIONS A young girl sitting on a low stool by the window mending a rent in her skirt (_Frontispiece_) "I cut them letters there fifteen years ago. Now I'm to cut 'em out" "A slight, dark form steals from the shadows and lays a hand on the stooping man's shoulder" "Cormorants!" escaped his lips. "They look for a feast of death, but they will be disappointed" [Illustration: Facsimile Page of Manuscript from THE LEAVENWORTH CASE "Yes, sir," Might even have entered his room late at night, crossed it and stood at his side, without disturbing him sufficiently to cause him to turn his head? "Yes," her hands pressing themselves painfully together. "Miss Leavenworth, the key to the library door is missing." She made no answer. "It has been testified to, that previous to the actual discovery of the murder, you visited the door of the library above. Will you tell us if the key to the door was there in the lock?" "It was not." Anna K. Green Rohlfs] THE CHIEF LEGATEE PART I A Woman of Mystery

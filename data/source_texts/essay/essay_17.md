@@ -1,0 +1,9 @@
+---
+id: essay_17
+genre: essay
+source: Wikisource/manual
+license: public-domain
+length: 300
+note: paste essay text below and update length
+---
+The fame of our greatest comic dramatist is founded wholly or mainly on but three of his five plays . His first comedy was little more than a brilliant study after such models as were eclipsed by this earliest effort of their imitator ; and tragedy under his hands appears rouged and wrinkled , in the patches and powder of Lady Wishfort . But his three great comedies are more than enough to sustain a reputation as durable as our language . Were it not for these we should have no samples to show of comedy in its purest and highest form . [ Ben Jonson ]( https :// en . wikisource . org / wiki / Author : Ben _ Jonson ), who alone attempted to introduce it by way of reform among the mixed work of a time when comedy and tragedy were as inextricably blended on the stage as in actual life , failed to give the requisite ease and the indispensable grace of comic life and movement to the action and passion of his elaborate and magnificent work . Of Congreve's immediate predecessors , whose aim had been to raise on French foundations a new English fabric of simple and unmixed comedy , Wycherley was of too base metal and Etherege was of metal too light to be weighed against him ; and besides theirs no other or finer coin was current than the crude British ore of Shadwell's brutal and burly talent . Borrowing a metaphor from [ Landor ]( https :// en . wikisource . org / wiki / Author : Walter _ Savage _ Landor ), we may say that a limb of Moli è re would have sufficed to make a Congreve , a limb of Congreve would have sufficed to make a [ Sheridan ]( https :// en . wikisource . org / wiki / Author : Richard _ Brinsley _ Sheridan ). The broad and robust humour of [ Vanbrugh's ]( https :// en . wikisource . org / wiki / Author : John _ Vanbrugh ) admirable comedies gives him a place on the master's

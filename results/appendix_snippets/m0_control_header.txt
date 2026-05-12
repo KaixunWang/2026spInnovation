@@ -1,0 +1,3 @@
+The following numbered list is a formatting control only.
+Keep output coherent but do not treat these placeholders as content constraints:
+<length-matched placeholder token string>

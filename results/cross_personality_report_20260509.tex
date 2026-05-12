@@ -1,0 +1,630 @@
+\documentclass[sigconf,nonacm]{acmart}
+
+\settopmatter{printacmref=false}
+
+\usepackage{amsmath}
+% amssymb omitted: acmart's math setup already defines AMS symbols (\Bbbk etc.); loading amssymb again triggers ``already defined'' errors.
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,breakable,skins}
+% Avoid writing colored prompt titles into PDF bookmarks (math, \\, etc.).
+\tcbset{bookmark=false}
+\definecolor{DefnBoxGray}{gray}{0.94}
+% Courier (pcr): avoids inconsolata (zi4) missing italic in listings.
+\newcommand{\PromptMono}{\footnotesize\fontencoding{T1}\fontfamily{pcr}\selectfont}
+\lstdefinestyle{promptlist}{
+  basicstyle=\PromptMono,
+  columns=fullflexible,
+  breaklines=true,
+  breakautoindent=false,
+  tabsize=2,
+  showstringspaces=false,
+  frame=none,
+  aboveskip=0pt,
+  belowskip=0pt,
+  lineskip=0pt,
+}
+\lstdefinestyle{promptlistdark}{
+  basicstyle=\color{white}\PromptMono,
+  columns=fullflexible,
+  breaklines=true,
+  breakautoindent=false,
+  tabsize=2,
+  showstringspaces=false,
+  frame=none,
+  aboveskip=0pt,
+  belowskip=0pt,
+  lineskip=0pt,
+}
+\newcommand{\AppendixSnippet}[1]{appendix_snippets/#1}
+\newenvironment{PromptSystemBox}[1]{%
+  \begin{tcolorbox}[
+    width=\linewidth,
+    enhanced, arc=2mm, outer arc=2mm,
+    colback=black, colframe=black, colupper=white,
+    coltitle=white, colbacktitle=black,
+    fonttitle=\bfseries\sffamily\footnotesize,
+    title={#1}, titlerule=0pt, boxrule=0pt,
+    top=1mm, boxsep=3mm,
+    before upper={\lstset{linewidth=\linewidth}},
+    before skip=\baselineskip, after skip=\baselineskip,
+    breakable]
+}{\end{tcolorbox}}
+\newenvironment{PromptUserBox}[1]{%
+  \begin{tcolorbox}[
+    width=\linewidth,
+    enhanced, arc=2mm, outer arc=2mm,
+    colback=white, colframe=black, colupper=black,
+    coltitle=black, colbacktitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    title={#1}, titlerule=0.55pt, titlerule style=black,
+    boxrule=0.85pt, top=0.5mm, boxsep=3.5mm, left=3.5mm, right=3.5mm,
+    before upper={\lstset{linewidth=\linewidth}},
+    before skip=\baselineskip, after skip=\baselineskip,
+    breakable]
+}{\end{tcolorbox}}
+\newenvironment{DefnBox}[1]{%
+  \begin{tcolorbox}[
+    width=\linewidth,
+    enhanced, arc=2mm,
+    colback=DefnBoxGray, colframe=black!55,
+    fonttitle=\bfseries\footnotesize,
+    title={#1},
+    boxrule=0.55pt, boxsep=3mm, breakable]
+}{\end{tcolorbox}}
+\newcommand{\LstPrompt}[1]{\lstinputlisting[style=promptlist]{\AppendixSnippet{#1}}}
+\newcommand{\LstPromptDark}[1]{\lstinputlisting[style=promptlistdark]{\AppendixSnippet{#1}}}
+
+\graphicspath{{figures/}{results/figures/}}
+
+\newcommand{\missingfigure}[2]{%
+  \fbox{%
+    \begin{minipage}[c][0.25\textheight][c]{0.92\linewidth}
+      \centering
+      Figure asset not found: \texttt{\detokenize{#1}}\\[0.5em]
+      #2
+    \end{minipage}%
+  }%
+}
+\newcommand{\maybeincludegraphics}[2]{%
+  \IfFileExists{#1}{%
+    \Description{#2}%
+    \includegraphics[width=\linewidth]{#1}%
+  }{%
+    \IfFileExists{results/#1}{%
+      \Description{#2}%
+      \includegraphics[width=\linewidth]{results/#1}%
+    }{%
+      \missingfigure{#1}{#2}%
+    }%
+  }%
+}
+
+\title[Conflict as Structural Stress in LLM Cross-Personality Rewriting]{Conflict as Structural Stress in LLM Cross-Personality Rewriting}
+
+\author{Kaixun Wang}
+\affiliation{
+  \institution{Southern University of Science and Technology}
+  \city{Shenzhen}
+  \country{China}
+}
+
+\begin{document}
+
+\begin{abstract}
+We frame cross-persona conflict as \textbf{structural stress}, not as a uniform ``hybrid vigor'' boost: outcomes \textbf{split by dimension}---automatic novelty (combined) rises with conflict curvature ($\beta_{d^2}{>}0$, Table~\ref{tab:quadratic}), while value and coherence bend downward ($\beta_{d^2}{<}0$), and headline creativity sits between those forces ($\beta_{d^2}{=}{-}0.111$, $p{\approx}4.6{\times}10^{-7}$, $n{=}4620$).
+The pre-registered T3-only fit places a quadratic vertex at $d^\ast{\approx}0.47$ on discrete-main T3 rows (Table~\ref{tab:h1}), signalling \textbf{medium} conflict within that subset; pooled binned means of $C_{\mathrm{auto}}$ vs.\ $d_H$ nonetheless trend broadly downward at scale (Figure~\ref{fig:main}), so we do \emph{not} describe headline creativity as a classic rise-then-fall ``inverted-U'' in the aggregate plot.
+The pooled sample comprises \textbf{4716} rows (two main arms, mechanism \textbf{60}, multihop 96). Exploratory bins tie rising conflict to higher mean sentiment displacement and non-monotone sentence-order similarity (Figure~\ref{fig:variability}). On the mechanism arm, mean $C_{\mathrm{auto}}$ ranks \textbf{M1}${>}$\textbf{M3}${>}$\textbf{M2}${>}$\textbf{M0} on fifteen high-$d$ cells per mode (descriptive).
+Separately, open-source \textbf{Qwen3-4B/8B} replications on the same discrete T3 protocol each show significantly negative quadratic curvature on $C_{\mathrm{auto}}$ vs.\ $d_H$ in the \textbf{same Gaussian mixed-effects specification} as Table~\ref{tab:scale_regression} (genre fixed effects with source-level random intercepts; $n{=}720$ T3 rows per checkpoint: $\beta_{d^2}{=}{-}0.592$ and $-0.505$, respectively, both $p{<}10^{-3}$).
+Figure~\ref{fig:scale_inverted_u} is a \textbf{visual supplement only}: it overlays genre-averaged \emph{OLS} predicted curves on the same Qwen rows to sketch shape and hybrid bands; those OLS vertices are not re-used as the primary inferential estimand and need not coincide numerically with the MixedLM $d^\ast$ column in Table~\ref{tab:scale_regression}.
+The judge-composite analogue appears in Figure~\ref{fig:scale_inverted_u_judge}.
+\end{abstract}
+
+\keywords{AI writing, persona prompting, creativity evaluation, style transfer, structural stress, LLM-as-judge, mixed-effects regression}
+
+\maketitle
+
+\section{Scope of This Report}
+
+Experiments span corpus-scale rewriting with automatic metrics and LLM-as-judge scores, merged for pooled analysis.
+Mixed-effects regressions use all rows with finite conflict scalar $d_H$ and finite outcomes on each dependent variable (hence $n{=}4620$ for headline automatic creativity, fewer than the 4716 pooled rows because some rows lack finite $d_H$ or outcomes).
+Discrete four-arm summaries (T0--T3 means) use the discrete main arm only, so they are not duplicated alongside the parallel continuous-target arm.
+
+\paragraph{Interpretive frame (structural stress).}
+Rather than treating conflict as a homogeneous creativity elevator, we emphasize \textbf{dimensional splitting}: the same stressor can elevate novelty-like signals while eroding value and coherence support for $C_{\mathrm{auto}}{=}N_{\mathrm{auto}}{\cdot}V_{\mathrm{auto}}$, consistent with creativity theories that distinguish generative fluency from evaluative constraint~\cite{boden} and with dual-process accounts that separate rapid associative production from slower monitoring of consistency and judgment~\cite{kahneman}.
+Under this reading, an interior optimum near $d^\ast{\approx}0.47$ (Table~\ref{tab:h1}) marks a \textbf{medium-conflict} regime where rewriting remains productive before coherence/value penalties steepen---not an endorsement of maximal persona distance.
+
+\section{Experimental Design}
+
+\noindent\textbf{Appendices.}
+Full rewrite and judge prompt templates, automatic-metric formulas, supplementary regression/binning robustness tables, and the exploratory structural-collapse GEE are in Appendices~\ref{app:prompts}--\ref{app:collapse}.
+
+\subsection{Persona Space and Conflict}
+
+Space-H maps each source to $(S,R)\in[-1,1]^2$: increasing $S$ toward $+1$ indicates more analytic, System-2-like prose (toward $-1$, more intuitive and affective); increasing $R$ toward $+1$ indicates a more adventurous register, toward $-1$ a more conservative one. Persona prototypes carry fixed coordinates, and rewrite rows inherit conflict from the source--target pair.
+
+\paragraph{Mapping sources into Space-H.}
+The default pipeline uses \textbf{deterministic HuggingFace probes} (no LLM sampling): $S$ clips $(f{-}e)$ where $f$ is a RoBERTa formality probability and $e$ is non-neutral emotion mass from a DistilRoBERTa emotion classifier; $R$ is the dot product of a StyleDistance sentence embedding with a fixed unit axis loaded from precomputed axis vectors (so register contrast is geometric rather than hand-labelled). An alternate configuration uses an LLM coordinate scorer that returns JSON $(S,R)$ on a 1--5 scale, averaged over repeated seeds with spread retained as a stability diagnostic---both backends normalize to $[-1,1]$ before conflict computation.
+
+\paragraph{Reliability and genre structure.}
+Coordinates are screened with a \textbf{genre-separation diagnostic}: per-genre means and standard deviations of $S$ and $R$, pairwise Euclidean distances between genre centroids in $(S,R)$, and one-way ANOVA plus Kruskal--Wallis tests for differences in $S$ and $R$ across genres. These checks justify treating Space-H as an ordinal scaffold for conflict rather than as a literal psychometric scale; absolute distances should still be interpreted cautiously.
+Figure~\ref{fig:coord_space_h} plots all corpus sources in $(S,R)$ by genre under the same deterministic mapping used for conflict construction.
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/coord_space_h_distribution.png}{Missing figure.}
+\caption{Source-level Space-H coordinates $(S,R)$ by genre ($n{=}60$ sources). Axis directions follow the project persona specification: $S$ runs from System-1 (intuitive, affective) at $-1$ to System-2 (analytic, rational) at $+1$; $R$ runs from conservative register at $-1$ to adventurous register at $+1$.}
+\label{fig:coord_space_h}
+\end{figure}
+
+Scalar conflict $d_H$ and directional $\Delta_H=(\Delta S,\Delta R)$ are computed from these vectors (Euclidean $d_H$ after the project's normalization).
+
+\subsection{Main Arms: Discrete and Continuous Targets}
+
+The discrete main arm uses T0 (identity), T1 (nearest persona), T2 (random persona placebo), and T3 (directed cross-personality).
+A parallel continuous-target arm repeats the same structure with continuously sampled T3 targets; both arms enter pooled regressions and genre summaries, while condition means in Table~\ref{tab:condition} use the discrete arm only.
+Figure~\ref{fig:d_distribution_discrete_continuous} contrasts the induced T3 distributions of scalar conflict $d_H$: discrete targets concentrate on a small set of corner-persona distances, whereas continuous targets fill the unit disk and yield lower typical $d_H$ (the same comparison yields a handful of descriptive summary statistics in the supplementary materials).
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Arm & Rows & T0 & T1/T2 & T3 or modes \\
+\midrule
+Discrete main & 2280 & 120 & 360 / 360 & 1440 T3 \\
+Continuous main & 2280 & 120 & 360 / 360 & 1440 T3 \\
+Mechanism & 60 & -- & -- & 15 each M0--M3 \\
+Multihop & 96 & -- & -- & 96 hop rows \\
+\midrule
+Total pooled & 4716 & 240 & 1440 / 1440 & 2880 T3, 60 mech, 96 mh.\\
+\bottomrule
+\end{tabular}
+\caption{Row counts by experimental arm. T0--T3 counts are per main arm (two arms). Multihop rows use hop indices rather than T0--T3 labels.}
+\label{tab:coverage}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/d_distribution_discrete_vs_continuous.png}{Missing figure.}
+\caption{T3 conflict distance $d_H$ under discrete persona corners versus continuously sampled targets in Space-H ($n{=}1440$ T3 rows per main arm). Overlaid density histograms with a shared bin count.}
+\label{fig:d_distribution_discrete_continuous}
+\end{figure}
+
+\paragraph{Open-source small-model replication arm.}
+Three \textbf{Qwen3} checkpoints (4B, 8B, 14B) are served through a \textbf{vLLM} local deployment and run the \emph{same} discrete main-arm protocol (T0--T3, joint mode, identical prompts and row schema) as the proprietary-generator arms; all downstream metric computation, judging, merging, and analysis use the same pipeline so that cross-scale comparisons isolate generator capacity rather than preprocessing differences.
+
+\section{Measurement Model}
+
+\subsection{Automatic novelty $N_{\mathrm{auto}}$}
+
+$N_{\mathrm{auto}}$ is the equal-weight mean of three \textbf{genre-relative} channels, each mapped to $[0,1]$ after comparing the rewrite to statistics of \emph{source texts in the same genre}: (i)~distinct-2 type-token ratio vs.\ genre mean/variance; (ii)~bigram novelty rate vs.\ typical intra-genre overlap; (iii)~optional SBERT-based $1{-}$cosine distance vs.\ mean pairwise embedding distance within the genre (this channel is informative only when embedding computation is enabled). Z-score--style clipping stabilizes outliers before rebinding to $[0,1]$. The design deliberately removes genre-wide verbosity confounds that would otherwise make poetry appear ``novel'' by construction.
+
+\subsection{Automatic value $V_{\mathrm{auto}}$}
+
+Let entailment be the probability of natural-language inference \emph{entailment} from source premise to generated hypothesis (cross-encoder MNLI). Let coherence be GPT-2 perplexity of the rewrite mapped monotonically to $[0,1]$ (inverse perplexity proxy for fluency). The primary value scalar is the \textbf{arithmetic mean} of entailment and coherence. A geometric mean variant $\sqrt{e\cdot c}$ is computed for robustness tables only.
+
+\subsection{Automatic creativity $C_{\mathrm{auto}}$}
+
+Primary automatic creativity is the \textbf{product}
+\[
+  C_{\mathrm{auto}} = N_{\mathrm{auto}}\, V_{\mathrm{auto}},
+\]
+clipped so both factors lie in $[0,1]$ beforehand. Multiplication encodes a conjunctive requirement: high scores need both divergence from the source \emph{and} retention of propositional/fluency support---consistent with definitions that treat creativity as combining originality with acceptable usefulness~\cite{runco}. An additive composite would reward dominance on one axis alone and blur interpretation when novelty and value move against each other under conflict.
+
+Pooling therefore lets novelty and value/coherence move in opposite directions under rising $d_H$, producing the split documented in Table~\ref{tab:quadratic}.
+
+\subsection{LLM-as-judge (validity arm)}
+
+Absolute judging uses a fixed rubric: seven Likert dimensions (novelty, surprise, imagery, fidelity, fluency, consistency, logical completeness) with strict JSON outputs on a 1--5 scale; each generation is scored independently relative to the source and genre. \textbf{Dual judges} are used in this study---DeepSeek V4 Pro and OpenAI GPT-4o---spanning distinct provider families rather than repeated calls to the same endpoint. Per-dimension scores are averaged across judges with successful parses. A pairwise creative-comparison prompt is implemented for head-to-head evaluation with randomized option order, but the merged analysis emphasises the absolute branch for stable row-wise fields. Aggregated judge novelty pools novelty-type dimensions; low correlation with $C_{\mathrm{auto}}$ therefore signals construct divergence between human-like rubric novelty and the automatic NLI$\times$perplexity definition rather than ``failure'' of either side in isolation.
+
+Judge fields are merged into the analysis table for validity checks; they \textbf{do not} replace $C_{\mathrm{auto}}$ as the prespecified primary outcome.
+
+\subsection{Judge validity and construct checks}
+
+Pearson correlations among judge and automatic scores include: judge novelty vs.\ automatic novelty (combined) $r{=}0.528$ (moderate agreement); automatic creativity vs.\ automatic novelty $r{=}0.635$; automatic creativity vs.\ value $r{=}0.668$; \textbf{automatic creativity vs.\ judge novelty} $r{=}0.118$.
+The near-zero association between judge-assigned novelty and automatic creativity cautions against treating the two as interchangeable: judge and automatic scores capture \textbf{partially distinct} aspects of rewriting quality, so downstream conclusions should specify which channel they speak to.
+Judge fidelity vs.\ automatic novelty is negative ($r{=}{-}0.319$), consistent with a novelty--fidelity tension; judge coherence and fidelity remain positively associated ($r{\approx}0.52$).
+
+To stress-test whether this channel dependence extends beyond linear correlations, we repeated the \textbf{T3-only} scale-style regressions used alongside Table~\ref{tab:scale_regression}, replacing $C_{\mathrm{auto}}$ with the judge-based composite $C_{\mathrm{judge}}$ (computed from merged judge scores in the same analysis pipeline).
+Each fit uses $C_{\cdot} \sim d_H + d_H^2 + C(\mathrm{genre})$ with a source-level random intercept on T3 rows (Qwen checkpoints: $n{=}720$ each; proprietary OpenAI runs pooled across two model assignments: $n{=}1440$ T3 discrete rows in one fit, as in Table~\ref{tab:judge_auto_divergence}).
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Generator & $\beta_{d^2}^{\mathrm{auto}}$ & $p(d^2)$ & Sig. & $\beta_{d^2}^{\mathrm{judge}}$ & $p(d^2)$ & Sig. \\
+\midrule
+Qwen3-4B  & $-0.592$ & $2.9{\times}10^{-5}$ & Yes & $-0.417$ & $0.188$ & No \\
+Qwen3-8B  & $-0.505$ & $2.2{\times}10^{-4}$ & Yes & $+0.242$ & $0.500$ & No \\
+Qwen3-14B & $-0.050$ & $0.719$               & No  & $+0.194$ & $0.604$ & No \\
+GPT-4o    & $-0.618$ & $7.0{\times}10^{-10}$ & Yes & $+1.007$ & $1.8{\times}10^{-5}$ & Yes \\
+\bottomrule
+\end{tabular}
+\caption{T3-only quadratic curvature for automatic vs.\ judge creativity by generator (mixed-effects with genre fixed effects and source random intercepts). GPT-4o shows significant \emph{negative} curvature on $C_{\mathrm{auto}}$ and significant \emph{positive} curvature on $C_{\mathrm{judge}}$ simultaneously---the clearest within-arm signature that the two scoring channels are not measuring the same construct.}
+\label{tab:judge_auto_divergence}
+\end{table}
+
+On the Qwen3 arms---where the same downstream judging stack is shared across checkpoints---$C_{\mathrm{judge}}$ need not track $C_{\mathrm{auto}}$.
+For \textbf{Qwen3-4B}, the $d_H^2$ slopes share direction (both negative) but only the automatic channel is conventionally significant; the judge channel is not ($p{\approx}0.19$).
+For \textbf{Qwen3-8B}, the signs \textbf{invert}: $C_{\mathrm{auto}}$ keeps the familiar negative curvature, whereas $C_{\mathrm{judge}}$ turns positive, so at this model's capacity frontier high-conflict rewrites can remain attractive to human-aligned rubric scores even as the NLI-and-perplexity channel deteriorates.
+Neither channel should be read as a substitute for the other: the split is direct evidence of \textbf{construct difference}, not ``noise'' in a single gold standard.
+For \textbf{Qwen3-14B}, neither quadratic term is significant on either channel in this slice, consistent with weaker separation at scale.
+
+The proprietary \textbf{GPT-4o} arm is the starkest case (Table~\ref{tab:judge_auto_divergence}): $\beta_{d^2}^{\mathrm{auto}}{=}{-}0.618$ ($p{\approx}7.0{\times}10^{-10}$) and $\beta_{d^2}^{\mathrm{judge}}{=}{+}1.007$ ($p{\approx}1.8{\times}10^{-5}$).
+Both are highly significant yet point in opposite directions, which is difficult to reconcile with a single latent ``creativity'' unless one allows the instruments to weight different stress responses.
+We interpret this as systematic \textbf{construct divergence}: the automatic composite primarily penalizes \emph{semantic drift} away from the source under rising conflict, whereas the judge composite rewards \emph{expressive surprise} encoded in the rubric---both are nominally about ``creative'' rewrites, but they encode different definitions of what counts as a gain.
+This nuance also helps explain the very low headline alignment between judge novelty and $C_{\mathrm{auto}}$ ($r{=}0.118$; Figure~\ref{fig:aux}, left panel): the two channels need not move together when stress pulls lexical--entailment fidelity and human-judged novelty in opposite directions.
+
+\paragraph{Surprise dimension along $d_H$.}
+The rubric \emph{surprise} score (Likert mean$/5$ on the same merged judge block) can be regressed with the \textbf{identical} T3-only mixed specification as $C_{\mathrm{auto}}$ and $C_{\mathrm{judge}}$: $\mathrm{surprise}{\sim} d_H{+}d_H^2{+}C(\mathrm{genre})$ with a source random intercept on the \textbf{same} $n{=}1440$ proprietary T3 discrete rows as Table~\ref{tab:judge_auto_divergence} (half GPT-4o, half GPT-4o mini).
+Table~\ref{tab:surprise_curvature} shows that \textbf{surprise} carries a large positive quadratic coefficient ($\beta_{d^2}{\approx}{+}1.89$, $p{<}10^{-8}$), closely tracking $C_{\mathrm{judge}}$ ($\beta_{d^2}{\approx}{+}1.01$) and opposite $C_{\mathrm{auto}}$ ($\beta_{d^2}{\approx}{-}0.62$).
+Further splitting the rubric shows that the surprise dimension's positive curvature is \textbf{almost twice} that of the headline judge composite and an order of magnitude tighter in $p$-value, so the high-conflict \emph{lift} on $C_{\mathrm{judge}}$ concentrates overwhelmingly on human-rated \emph{surprise} rather than on a uniform shift across all seven Likert legs.
+In short: high conflict raises judged quality chiefly by activating perceived surprise, which sharpens the construct-divergence story with a concrete rubric source.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Outcome (T3 pooled, $n{=}1440$) & $\beta_{d^2}$ & $p(d^2)$ \\
+\midrule
+Surprise$/5$ (rubric mean) & $+1.891$ & $8.1{\times}10^{-9}$ \\
+$C_{\mathrm{auto}}$ & $-0.618$ & $7.0{\times}10^{-10}$ \\
+$C_{\mathrm{judge}}$ & $+1.007$ & $1.8{\times}10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\caption{T3-only quadratic curvature for rubric surprise vs.\ headline composites (Gaussian mixed-effects with genre fixed effects and source random intercepts).}
+\label{tab:surprise_curvature}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Condition & Creativity & Novelty & Value & NLI & Coherence \\
+\midrule
+T0 & 0.2317 & 0.3334 & 0.7044 & 0.7486 & 0.6602 \\
+T1 & 0.3197 & 0.4176 & 0.7677 & 0.7759 & 0.7596 \\
+T2 & 0.3120 & 0.4231 & 0.7408 & 0.7153 & 0.7662 \\
+T3 & 0.3124 & 0.4232 & 0.7409 & 0.7144 & 0.7675 \\
+\midrule
+\multicolumn{6}{@{}l@{}}{\footnotesize\emph{Open-source Qwen3 generators, T3 condition only (same discrete protocol as T0--T3 block above).}} \\
+Qwen3-4B & 0.2449 & 0.3695 & 0.6735 & 0.5106 & 0.8364 \\
+Qwen3-8B & 0.2543 & 0.3870 & 0.6664 & 0.5190 & 0.8138 \\
+Qwen3-14B & 0.2508 & 0.3968 & 0.6429 & 0.5096 & 0.7763 \\
+\midrule
+M0 & 0.1615 & 0.4415 & 0.3879 & 0.4147 & 0.3611 \\
+M1 & 0.2044 & 0.4471 & 0.4771 & 0.5652 & 0.3890 \\
+M2 & 0.1908 & 0.4583 & 0.4305 & 0.5372 & 0.3238 \\
+M3 & 0.2018 & 0.4013 & 0.5084 & 0.5305 & 0.4863 \\
+\bottomrule
+\end{tabular}
+\caption{Condition means. T0--T3: discrete main arm only. M0--M3: mechanism arm, fifteen independent generations per mode on top-$d$ cells. For the open-source Qwen3 rows, lower T3 creativity versus proprietary T3 tracks mainly \textbf{value} and \textbf{NLI} shortfalls rather than novelty, consistent with weaker semantic fidelity in smaller generators.}
+\label{tab:condition}
+\end{table}
+
+\section{Descriptive Results}
+
+\subsection{Genre-Level Patterns}
+
+Pooling discrete and continuous main arms (4560 rows) yields the following means.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Genre & Creativity & Novelty & Value & NLI & Coherence \\
+\midrule
+Academic & 0.2838 & 0.3913 & 0.7342 & 0.6879 & 0.7805 \\
+Essay & 0.3434 & 0.4466 & 0.7730 & 0.8078 & 0.7383 \\
+Narrative & 0.2593 & 0.3628 & 0.7174 & 0.5547 & 0.8801 \\
+Poetry & 0.3385 & 0.4520 & 0.7519 & 0.9054 & 0.5984 \\
+\bottomrule
+\end{tabular}
+\caption{Genre means pooling discrete and continuous main arms (4560 rows).}
+\label{tab:genre}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/inverted_u_creativity_auto.png}{Missing figure.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/directional_field_creativity_auto.png}{Missing figure.}
+\end{minipage}
+\caption{Binned mean $C_{\mathrm{auto}}$ vs.\ $d_H$ and the directional field in $(\Delta S,\Delta R)$. Headline creativity trends downward with $d_H$ in pooled binned means (left); regressions still estimate negative $d_H^2$ on $C_{\mathrm{auto}}$ over the mixed sample alongside positive novelty curvature (Table~\ref{tab:quadratic}). Right: interactive $\Delta S$--$\Delta R$ structure.}
+\label{fig:main}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/judge_auto_validity_matrix.png}{Missing figure.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}
+\centering
+\maybeincludegraphics{figures/t3_d_H_distribution_main.png}{Missing figure.}
+\end{minipage}
+\caption{Left: Pearson correlations among judge and automatic scores. Right: $d_H$ distribution on discrete-main T3 rows, contextualizing the H1 vertex relative to observed conflict mass.}
+\label{fig:aux}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/generation_variability_sentiment_kendall.png}{Missing figure.}
+\caption{Exploratory \textbf{generation variability} vs.\ conflict: eight equal-width $d_H$ bins over the pooled sample. \emph{Top:} mean absolute sentiment displacement ($[0,2]$). \emph{Bottom:} mean sentence-order preservation score ($[0,1]$, higher $\approx$ closer to source order).}
+\label{fig:variability}
+\end{figure}
+
+\section{Conflict Intensity}
+
+\subsection{Regression specification}
+
+The pooled quadratic models regress each outcome on linear and quadratic conflict terms plus categorical genre and experimental condition:
+\[
+  y \sim d_H + d_H^2 + \sum_g \mathbf{1}_{\mathrm{genre}=g} + \sum_c \mathbf{1}_{\mathrm{condition}=c}.
+\]
+Observations are rewrite-level rows; \textbf{random intercepts group by source text}, reflecting repeated generations from the same corpus item without nesting random effects in persona identity. Condition absorbs arm contrasts (T0--T3, mechanism modes, multihop structure as coded); persona distance enters through $d_H$ and directional regressors rather than as an extra random classification. Mixed linear models are used when variance-component estimation is numerically stable; otherwise the same fixed-effects structure is estimated by OLS. In sparse designs the estimated source-level variance may collapse toward zero, so $\beta_{d^2}$ should be read as a pooled association that partly marginalizes within-source correlation rather than as a nested hierarchical causal estimand.
+Directional regressions swap $(d_H,d_H^2)$ for $(\Delta S,\Delta R)$ plus squares, product, and Euclidean $|\Delta_H|$, retaining the same genre/condition fixed effects and source-level intercept grouping.
+
+\subsection{Pooled Quadratic Results}
+
+Mixed-effects fits surface the dimensional split: \textbf{negative} $d_H^2$ on headline creativity, value, and coherence versus \textbf{positive} $d_H^2$ on novelty (combined), over $n{=}4620$ rows with valid $d_H$ and finite outcomes on each metric (Table~\ref{tab:quadratic}).
+Together with the T3-only vertex $d^\ast{\approx}0.47$ (Table~\ref{tab:h1}), one can read a medium-conflict regime as comparatively favourable \emph{within that subset}, in line with classic arousal--performance tradeoffs~\cite{yerkes}; Figure~\ref{fig:main} nonetheless shows pooled binned $C_{\mathrm{auto}}$ declining with $d_H$, so the vertex should not be equated with a visible global inverted-U in the aggregate bins.
+
+\paragraph{Scale dependence of the inverted-U.}
+Table~\ref{tab:scale_regression} fixes the same quadratic specification on automatic creativity ($C_{\mathrm{auto}}\sim d_H+d_H^2+C(\mathrm{genre})$) with \textbf{source-level random intercepts}, fit \textbf{separately per metrics file} on \textbf{T3 discrete-target rows only}.
+Each open-source Qwen checkpoint file contributes $n{=}720$ T3 rows (one generator model per file).
+The proprietary slice pools \textbf{all} T3 discrete-target rows for the two OpenAI generator assignments in a \emph{single} mixed-effects fit ($n{=}1440$: half GPT-4o, half GPT-4o mini), matching Table~\ref{tab:judge_auto_divergence}. This is not ``half the corpus'' and not a discrete-vs-continuous split: continuous-target T3 rows for these generators are not included in that proprietary discrete pool.
+Optimisers use L-BFGS-B by default; Powell is used when the Hessian is singular (typical on the narrow Qwen subsets).
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrl}
+\toprule
+Generator (T3) & $\beta_{d^2}$ & $p(d^2)$ & $d^\ast$ & Sig.\ ($p{<}0.05$) \\
+\midrule
+Qwen3-4B & $-0.5925$ & $2.89{\times}10^{-5}$ & 0.4811 & Yes \\
+Qwen3-8B & $-0.5052$ & $2.24{\times}10^{-4}$ & 0.5319 & Yes \\
+Qwen3-14B & $-0.0501$ & 0.7185 & 0.0185 & No \\
+GPT-4o (pooled) & $-0.6181$ & $6.95{\times}10^{-10}$ & 0.4954 & Yes \\
+\bottomrule
+\end{tabular}
+\caption{Quadratic curvature for $C_{\mathrm{auto}}$ vs.\ $d_H$ by generator (T3-only discrete rows; mixed-effects with source intercepts). Qwen checkpoints: $n{=}720$ each. \textbf{GPT-4o (pooled)}: $n{=}1440$ (half GPT-4o, half GPT-4o mini) in one fit, matching Table~\ref{tab:judge_auto_divergence}.}
+\label{tab:scale_regression}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Metric & $n$ & $\beta_{d^2}$ & $p(d^2)$ \\
+\midrule
+Creativity auto & 4620 & $-0.1111$ & $4.58{\times}10^{-7}$ \\
+Creativity geom & 4620 & $-0.1479$ & $2.76{\times}10^{-8}$ \\
+Value auto & 4620 & $-0.3901$ & $7.22{\times}10^{-17}$ \\
+Coherence auto & 4620 & $-0.3266$ & $5.37{\times}10^{-11}$ \\
+Novelty (combined) & 4620 & $0.0908$ & $1.90{\times}10^{-6}$ \\
+\bottomrule
+\end{tabular}
+\caption{Quadratic terms from pooled mixed-effects regressions on headline outcomes and components. Singular random-effect covariance warnings can occur at numerical boundaries.}
+\label{tab:quadratic}
+\end{table}
+
+\subsection{Pre-Registered H1 Check}
+
+The fitted vertex $d^\ast{\approx}0.47$ operationalizes \textbf{medium} conflict within discrete-main T3 mass (empirical q03--q97 shown); it lies outside the narrower pre-registered vertex band yet inside the sample-mass diagnostic, so claims should reference both the band logic and the descriptive optimum. This interior optimum is estimated on T3 rows only and coexists with monotonic-looking pooled binned means vs.\ $d_H$ (Figure~\ref{fig:main}).
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+H1 diagnostic & Value \\
+\midrule
+T3 main rows & 1440 \\
+$\beta_d$ & 0.3265 \\
+$\beta_{d^2}$ & $-0.3481$ \\
+$p(d^2)$ & $6.51{\times}10^{-4}$ \\
+Fitted vertex $d$ & 0.4689 \\
+Empirical $d$ q03 / q97 & 0.2948 / 0.7971 \\
+Vertex inside pre-reg band & False \\
+Vertex inside sample mass & True \\
+Pooled main $p(d^2)$ & $4.58{\times}10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\caption{Pre-registered H1 diagnostic for automatic creativity.}
+\label{tab:h1}
+\end{table}
+
+The open-source replications sharpen where ``medium conflict'' sits in $d_H$: \textbf{Qwen3-4B} concentrates useful mass roughly in $d_H\in[0.30,0.63]$, while \textbf{Qwen3-8B} widens slightly to $d_H\in[0.32,0.74]$ around the same quadratic peaks (Figure~\ref{fig:scale_inverted_u}), offering generator-specific hybrid operating bands beyond the pooled GPT-only vertex in Table~\ref{tab:h1}. The same construction applied to the judge composite $C_{\mathrm{judge}}$ is shown in Figure~\ref{fig:scale_inverted_u_judge} for direct visual comparison with the automatic channel.
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/scale_inverted_u.png}{Missing figure.}
+\caption{T3-only genre-averaged OLS predictions of $C_{\mathrm{auto}}$ vs.\ $d_H$ for Qwen3 checkpoints (4B/8B/14B). Vertical dotted lines mark fitted vertices for 4B/8B; shaded bands sketch approximate hybrid intervals (4B: $[0.30,0.63]$; 8B: $[0.32,0.74]$).}
+\label{fig:scale_inverted_u}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/scale_inverted_u_judge.png}{Missing figure.}
+\caption{Same axes and curve construction as Figure~\ref{fig:scale_inverted_u}, but with mean predicted $C_{\mathrm{judge}}$ (genre-averaged OLS) on the vertical axis. Contrasts the rubric-based composite against the automatic $C_{\mathrm{auto}}$ trajectories on identical Qwen3 T3 rows.}
+\label{fig:scale_inverted_u_judge}
+\end{figure}
+
+\subsection{Conflict direction}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Term & Coefficient & $p$ \\
+\midrule
+$\Delta S$ & 0.0164 & $3.57{\times}10^{-43}$ \\
+$\Delta R$ & 0.0028 & 0.0127 \\
+$\Delta S^2$ & $-0.0018$ & 0.607 \\
+$\Delta R^2$ & $-0.0143$ & $3.67{\times}10^{-3}$ \\
+$\Delta S\Delta R$ & 0.0075 & $1.93{\times}10^{-11}$ \\
+$|\Delta|$ & 0.0190 & 0.0343 \\
+\bottomrule
+\end{tabular}
+\caption{Directional regression for automatic creativity.}
+\label{tab:direction}
+\end{table}
+
+The same directional structure reappears when we restrict to the \textbf{open-source Qwen3-4B/8B} T3 slices: the interaction term $\Delta S{\times}\Delta R$ remains the dominant nonlinear channel (highly significant on 8B, jointly informative on 4B alongside negative $\Delta R^2$ curvature), matching the pooled GPT-family pattern in Table~\ref{tab:direction} and supporting a shared interpretation that oblique moves in $(\Delta S,\Delta R)$---not pure radial distance---shape automatic creativity.
+
+\subsection{Causal contrasts}
+
+Bucketed contrasts pool \textbf{both} main metric files (hence larger per-bucket $n$ than a discrete-only table).
+
+Across all three conflict buckets, mean $C_{\mathrm{auto}}$ at T3 lies below both T1 and T2 (Table~\ref{tab:causal}), and both T3--T1 and T3--T2 contrasts are negative or near zero. At this pooled scale, \textbf{directed cross-persona targeting (T3) does not outperform} nearest-neighbour (T1) or random persona assignment (T2) on automatic creativity; if anything, it trails both---a pattern that should temper expectations that ``designed'' cross-persona moves automatically beat placebo-style persona swaps.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Bucket & $n_{T1}$ & $n_{T2}$ & $n_{T3}$ & T3--T1 & T3--T2 & mean T1 & mean T2 & mean T3 \\
+\midrule
+Low & 228 & 68 & 1004 & $-0.0023$ & $-0.0009$ & 0.3127 & 0.3113 & 0.3104 \\
+Mid & 468 & 240 & 841 & $-0.0165$ & $-0.0061$ & 0.3211 & 0.3107 & 0.3046 \\
+High & 24 & 412 & 1035 & $-0.0523$ & $-0.0078$ & 0.3591 & 0.3146 & 0.3068 \\
+\bottomrule
+\end{tabular}
+\caption{Bucketed causal contrasts on automatic creativity.}
+\label{tab:causal}
+\end{table}
+
+On the open-source \textbf{Qwen3} replication metrics, the pre-registered \textbf{H5} (quadratic curvature in JSD-based divergence vs.\ $d_H$) and \textbf{H6} (T3 vs.\ T2 contrasts within binned conflict) are again \emph{non-significant}, paralleling the proprietary pattern above: directed T3 persona choice does not deliver incremental gains over the T2 placebo within fixed $d_H$ bins.
+This is a substantive empirical finding rather than a methodological defect, so we report it here alongside the causal buckets rather than under limitations.
+
+\paragraph{Structural tail check (appendix).}
+The automatic-channel deterioration under high conflict is already conveyed by $C_{\mathrm{auto}}$, NLI, and coherence slopes in the main tables.
+For readers who want a \textbf{binary} articulation of the same stress axis, Appendix~\ref{app:collapse} fits a clustered binomial GEE on a joint low-NLI-and-low-coherence indicator (sample-relative $q{=}0.2$ cut-offs on the same $n{=}1440$ proprietary T3 pool); marginal fitted risk rises steeply at high $d_H$.
+We keep that material in an appendix because it introduces GEE machinery and sample-defined thresholds that sit awkwardly with the main mixed-effects narrative, and because the qualitative message largely overlaps what is already visible in the automatic scores.
+
+\section{Mechanism and Multihop Branches}
+
+\subsection{Mechanism Experiment}
+
+Mechanism generations restrict to the fifteen highest-$d$ discrete-main cells and cross four informational modes (M0--M3); each mode has fifteen rows (Table~\ref{tab:condition}).
+
+\paragraph{Which instructional mechanism helps most?}
+Pooling those sixty rows, mean automatic creativity orders \textbf{M1} (direct rewrite, highest mean $C_{\mathrm{auto}}$) ${>}$ \textbf{M3} (constraint-forward rewrite) ${>}$ \textbf{M2} (two-stage) ${>}$ \textbf{M0} (control). This addresses the project-book theme that different conflict-\emph{instruction} bundles yield different creative profiles: unconstrained cross-persona rewriting (M1) best preserves $C_{\mathrm{auto}}$ here, tightly constrained rewriting (M3) is second, explicit decomposition (M2) sits mid-pack, and the passive control (M0) is lowest---all on the same high-$d$ cells.
+With $n{=}15$ per mode this ordering is \textbf{descriptive}; formal mechanism-only inference would warrant dedicated models with pair-level blocking.
+
+Table~\ref{tab:mechanism} restricts to rows with finite $d_H$ and outcome, takes the upper third of $d_H$ \emph{globally}, then aggregates by mode. The M0--M3 lines describe mechanism modes inside that high-$d$ slice; the joint-mode line summarizes continuous-main rows under that label in the same slice ($n{=}1470$), not the sixty-row mechanism-only sample.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Mode & Mean creativity & Std. & Count \\
+\midrule
+M0 & 0.1615 & 0.0701 & 15 \\
+M1 & 0.2044 & 0.0793 & 15 \\
+M2 & 0.1908 & 0.0859 & 15 \\
+M3 & 0.2018 & 0.0674 & 15 \\
+Joint & 0.3099 & 0.0765 & 1470 \\
+\bottomrule
+\end{tabular}
+\caption{Mechanism-related summary in the global high-$d$ slice (see text).}
+\label{tab:mechanism}
+\end{table}
+
+\subsection{Multihop Prediction Check}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrr}
+\toprule
+Genre & Bin & Multihop & Direct T3 & Delta \\
+\midrule
+Academic & Low & 0.3244 & 0.2941 & 0.0303 \\
+Academic & Mid & 0.2134 & 0.2830 & $-0.0696$ \\
+Academic & High & 0.2553 & 0.2736 & $-0.0182$ \\
+Essay & Low & 0.3968 & 0.3412 & 0.0557 \\
+Essay & Mid & 0.3948 & 0.3527 & 0.0421 \\
+Essay & High & 0.4142 & 0.3429 & 0.0713 \\
+Narrative & Low & 0.2695 & 0.2706 & $-0.0011$ \\
+Narrative & Mid & 0.2781 & 0.2515 & 0.0266 \\
+Narrative & High & 0.2733 & 0.2619 & 0.0115 \\
+Poetry & Low & 0.3333 & 0.3298 & 0.0035 \\
+Poetry & Mid & 0.4294 & 0.3404 & 0.0890 \\
+Poetry & High & 0.3704 & 0.3512 & 0.0192 \\
+\bottomrule
+\end{tabular}
+\caption{Multihop vs.\ direct T3 mean automatic creativity by genre and $d$ bin.}
+\label{tab:multihop}
+\end{table}
+
+Multihop effects are \textbf{genre-dependent}. Essay rows show multihop strictly above direct T3 in every $d$ bin (all positive deltas), suggesting smoother persona paths help that register here. Academic rows reverse under mid conflict (delta ${\approx}{-}0.07$), while low/high bins are mixed or modest---so gradual hops are not universally preferable and should be evaluated per genre and conflict band.
+
+\section{Limitations}
+
+\begin{itemize}\itemsep2pt
+\item Pooled regressions mix discrete and continuous main arms with mechanism and multihop rows; interpret coefficients as pooled associations, not as a single pre-registered estimand.
+\item Mixed-effects fits may emit singular-covariance or convergence warnings.
+\item Causal buckets and mechanism summaries depend on binning and filtering choices in the analysis implementation.
+\item Mechanism arm contrasts use fifteen draws per mode on fixed high-$d$ cells; generalization to other persona pairs requires replication.
+\item Sentiment/Kendall variability curves (Figure~\ref{fig:variability}) are exploratory and share the pooled binning choice (eight equal-width $d_H$ bins).
+\item For smaller checkpoints (especially Qwen3), \textbf{genre-averaged OLS} curves in Figure~\ref{fig:scale_inverted_u} are illustrative; their nominal standard errors do not incorporate the same hierarchical structure as the MixedLM rows in Table~\ref{tab:scale_regression} and can be \textbf{anti-conservative} when read as inferential objects rather than as sketches of shape.
+\item The ``\textbf{capacity threshold}'' language for Qwen3-8B (judge curvature turning positive while automatic curvature stays negative) is a \textbf{post hoc descriptive} reading of two fitted slopes at different model sizes, not an independently identified causal capacity parameter.
+\item Appendix~\ref{app:collapse} reports a binomial GEE on sample-defined collapse cut-offs (not a calibrated GLMM); treat as exploratory triangulation, not as an absolute failure probability.
+\end{itemize}
+
+\section{Conclusion}
+
+Cross-persona conflict behaves as \textbf{structural stress}: it does \emph{not} uniformly lift creativity; instead it reallocates mass across automatic subscores---novelty curvature turns positive while value and coherence turn sharply negative (Table~\ref{tab:quadratic}). The discrete-main T3-only quadratic places a vertex near $d^\ast{\approx}0.47$ (Table~\ref{tab:h1}), while pooled binned means of $C_{\mathrm{auto}}$ vs.\ $d_H$ trend downward at scale (Figure~\ref{fig:main}); together these caution against equating ``medium conflict'' with a visibly inverted-U aggregate trajectory for headline creativity.
+Exploratory variability traces (Figure~\ref{fig:variability}) show sentiment displacement rising into mid-to-high conflict bins and the sentence-order score dipping through mid bins, consistent with more aggressive reordering co-occurring with the value/coherence erosion channel.
+Directionally, $\Delta S$, $\Delta R^2$, and $\Delta S\Delta R$ remain central (Table~\ref{tab:direction}). On mechanism prompts over shared high-$d$ cells, mean $C_{\mathrm{auto}}$ orders M1${>}$M3${>}$M2${>}$M0 (Table~\ref{tab:condition}), a descriptive answer to ``which bundle works best'' within this arm.
+Open-source Qwen3-4B/8B runs reproduce the same qualitative story at smaller scale: a significant inverted-U for $C_{\mathrm{auto}}$ vs.\ $d_H$ with optima near $d^\ast{\approx}0.46$--$0.53$ and practical hybrid bands $d_H\in[0.30,0.63]$ (4B) / $[0.32,0.74]$ (8B) (Table~\ref{tab:scale_regression}; Figure~\ref{fig:scale_inverted_u}; judge-channel analogue Figure~\ref{fig:scale_inverted_u_judge}).
+Treat all claims as conditional on branch (main vs.\ mechanism vs.\ multihop), sampling mode, and the narrow mechanism sample size.
+
+For practitioners, the choice of evaluation metric matters as much as the choice of conflict distance. On the automatic channel ($C_{\mathrm{auto}}$, which penalizes semantic drift), medium conflict near $d^\ast{\approx}0.47$ is comparatively favourable and high conflict degrades quality---making it the right metric for fidelity-sensitive tasks such as academic editing or translation. On the judge channel ($C_{\mathrm{judge}}$, which rewards human-perceived surprise), the curvature reverses: GPT-4o shows $\beta_{d^2}^{\mathrm{judge}}{=}{+}1.007$ ($p{<}10^{-4}$), meaning higher conflict produces more positively-evaluated rewrites by human-like rubrics---making it the right metric for expressive tasks such as creative writing or advertising copy. The two channels are not interchangeable; downstream design should select the metric that matches the intended use case before tuning conflict distance.
+
+\appendix
+\input{appendix_cross_personality_20260509.tex}
+
+\begin{thebibliography}{9}
+\bibitem{kahneman}
+D.~Kahneman.
+\newblock \textit{Thinking, Fast and Slow}.
+\newblock Farrar, Straus and Giroux, 2011.
+
+\bibitem{boden}
+M.~Boden.
+\newblock \textit{The Creative Mind: Myths and Mechanisms}.
+\newblock Routledge, 2004.
+
+\bibitem{runco}
+M.~Runco and G.~Jaeger.
+\newblock The standard definition of creativity.
+\newblock \textit{Creativity Research Journal} 24, 1 (2012), 92--96.
+
+\bibitem{yerkes}
+R.~Yerkes and J.~Dodson.
+\newblock The relation of strength of stimulus to rapidity of habit-formation.
+\newblock \textit{Journal of Comparative Neurology and Psychology} 18 (1908), 459--482.
+\end{thebibliography}
+
+\end{document}

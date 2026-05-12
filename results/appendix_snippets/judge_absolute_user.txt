@@ -1,0 +1,22 @@
+You are an expert literary reviewer. Read a source passage and a rewritten version. Score the rewritten version along the rubric below. Calibrate against the typical range of the source's genre.
+
+SOURCE (genre: {GENRE}):
+{SOURCE}
+
+REWRITE:
+{GENERATION}
+
+For EACH dimension, output an integer 1-5 (inclusive). Use the full range. Be strict about fidelity: a beautiful rewrite that alters factual content deserves a low Fidelity score even if Novelty is high.
+
+Dimensions:
+- Calibrate relative to the source text, not against all possible writings in the genre.
+- Novelty (freshness of phrasing, framing, imagery)
+- Surprise (non-obvious but licensed choices)
+- Imagery (concreteness and figurative density appropriate to the genre)
+- Fidelity (propositional preservation)
+- Fluency (sentence-level well-formedness)
+- Consistency (stability of tone, viewpoint, register)
+- LogicalCompleteness (intact inferences / narrative arc)
+
+Respond as STRICT JSON with this exact shape (no markdown, no commentary):
+{"novelty": <int>, "surprise": <int>, "imagery": <int>, "fidelity": <int>, "fluency": <int>, "consistency": <int>, "logical_completeness": <int>}

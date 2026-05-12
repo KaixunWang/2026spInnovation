@@ -1,0 +1,307 @@
+\documentclass[sigconf,nonacm]{acmart}
+
+\settopmatter{printacmref=false}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{array}
+
+\graphicspath{{figures/}}
+
+\title{CS340 Assignment 3: Bias Mitigation for Wage Prediction}
+
+\author{Kaixun Wang}
+\affiliation{
+  \institution{Southern University of Science and Technology}
+  \city{Shenzhen}
+  \country{China}
+}
+
+\begin{document}
+
+\begin{abstract}
+We study annual wage prediction from census-style tabular features with sensitive attributes \texttt{gender} and \texttt{race}.
+Exploratory analysis quantifies wage disparities and distributional shifts across groups.
+A biased baseline uses Ridge regression on raw wages with full features (including sensitive attributes) and a logistic model for a training-fold median threshold binary ``high income'' label, which operationalizes confusion-matrix fairness metrics.
+We report the course Table~3 metrics (demographic parity, equalized odds, equal opportunity, conditional statistical parity, fairness through unawareness, and a heuristic fairness-through-awareness check) plus regression extensions (group RMSE/MAE spreads, residual gaps, disparate-impact style selection ratios).
+Three mitigations are implemented: inverse-frequency sample reweighting by gender, dropping sensitive columns (fairness through unawareness structurally), and per-gender affine calibration in log-wage space on a holdout split.
+On validation, among candidates within $112\%$ of the biased Ridge RMSE, we select the model minimizing the sum of gender and race RMSE spreads; the chosen run drops sensitive features (\texttt{unaware\_drop\_sensitive}), improving several fairness measures at a modest accuracy cost.
+EDA adds proxy--sensitive association tests (Cram\'er's $V$, $\chi^2$) and correlation among numeric features and $\log(1{+}\texttt{incwage})$.
+We stress that the counterfactual flip metric is uninformative after structural unawareness, and we treat the legacy kNN median $|\Delta\hat y|/\mathrm{dist}$ ratio as ill-scaled unless predictions are transformed (e.g.\ $\log$ wage) to match the smooth target scale.
+\end{abstract}
+
+\keywords{algorithmic fairness, wage prediction, Ridge regression, Fairlearn, bias mitigation}
+
+\maketitle
+
+\section{Dataset and exploratory bias analysis}
+
+The target is annual wage \texttt{incwage}; sensitive attributes are \texttt{gender} and \texttt{race}; \texttt{sch} (education) is treated as a legitimate factor $L$ for conditional statistical parity.
+Scripts: \texttt{preprocess.py}, \texttt{eda\_bias.py}; summaries are saved in \texttt{results/eda\_summary.csv}.
+
+Group summaries show large wage gaps: e.g.\ mean wage Male vs.\ Female $\approx\$54{,}268$ vs.\ $\$28{,}517$ (Cohen's $d\approx 0.54$ for Male--Female Mann--Whitney), and substantial differences across race categories (see CSV for counts and means).
+Figure~\ref{fig:eda_wage} shows wage distributions by sensitive group; Figure~\ref{fig:eda_more} shows sample counts by gender$\times$race and mean wage by education and gender.
+
+We further quantify \emph{proxy} structure: occupation (\texttt{occ}), industry (\texttt{ind}), education (\texttt{sch}), marital status, region, employment status, and union status are not used as sensitive inputs but can correlate with \texttt{gender} and \texttt{race}.
+Table~\ref{tab:proxy_assoc} reports Cram\'er's $V$ from $\chi^2$ tests on full training data (\texttt{results/proxy\_assoc.csv}); associations are large for \texttt{occ} and \texttt{ind} (e.g.\ $V\approx 0.62$ for \texttt{occ}$\times$\texttt{gender}, $V\approx 0.47$ for \texttt{ind}$\times$\texttt{gender}), supporting the concern that models without explicit sensitive columns may still recover group information.
+Figure~\ref{fig:eda_proxy} shows, for frequent categories, women's share by occupation and row-normalized industry$\times$race composition; Figure~\ref{fig:eda_corr} gives Pearson correlations among numeric features and $\log(1{+}\texttt{incwage})$.
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_wage_by_gender.png}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_wage_by_race.png}
+\end{minipage}
+\caption{EDA: wage (\texttt{incwage}) by \texttt{gender} (left) and \texttt{race} (right); boxplots and KDEs from \texttt{eda\_bias.py}.}
+\label{fig:eda_wage}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_crosstab_gender_race.png}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_mean_wage_sch_gender.png}
+\end{minipage}
+\caption{Left: sample counts by gender and race. Right: mean wage by education (\texttt{sch}) and gender.}
+\label{fig:eda_more}
+\end{figure*}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Proxy feature & $V$ vs.\ \texttt{gender} & $V$ vs.\ \texttt{race} \\
+\midrule
+\texttt{occ} & $0.621$ & $0.247$ \\
+\texttt{ind} & $0.471$ & $0.193$ \\
+\texttt{sch} & $0.069$ & $0.238$ \\
+\texttt{region} & $0.028$ & $0.221$ \\
+\bottomrule
+\end{tabular}
+\caption{Cram\'er's $V$ for association between selected categorical proxies and sensitive attributes (all $p\ll 0.001$ where defined; \texttt{results/proxy\_assoc.csv}).}
+\label{tab:proxy_assoc}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_occ_gender_female_share.png}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{eda_ind_race_heatmap.png}
+\end{minipage}
+\caption{Left: share of women among the top-$25$ occupations by sample count. Right: row-normalized industry$\times$race counts for the top-$20$ industries by count.}
+\label{fig:eda_proxy}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.55\linewidth]{eda_corr_numeric_logwage.png}
+\caption{Pearson correlation among numeric inputs and $\log(1{+}\texttt{incwage})$ (\texttt{eda\_bias.py}).}
+\label{fig:eda_corr}
+\end{figure}
+
+\section{Prediction models}
+
+\subsection{Continuous wage (primary submission target)}
+Ridge regression predicts raw \texttt{incwage} with a \texttt{ColumnTransformer}: \texttt{StandardScaler} on numeric features and \texttt{OneHotEncoder(handle\_unknown='ignore')} on categoricals (including high-cardinality \texttt{occ}, \texttt{ind}).
+Train/validation split 80/20, seed $42$ (\texttt{common.RANDOM\_STATE}); artifact \texttt{models/biased\_main\_regressor.pkl}.
+
+\subsection{Binary high-income surrogate}
+Binary label $y_{\mathrm{high}}=\mathbb{1}[\texttt{incwage}>\tau]$ with $\tau$ equal to the median wage on the \emph{training} fold only ($\tau=35{,}000$ in the saved run) to avoid leakage.
+A logistic regression with the same preprocessing supports Fairlearn demographic parity / equalized odds and related rates; artifact \texttt{models/biased\_main\_logistic.pkl}.
+
+\subsection{Phase B benchmark (log target)}
+Three-fold CV RMSE on $z=\log(1+\texttt{incwage})$ for linear baselines (\texttt{train\_biased\_main.py}) is reported in Table~\ref{tab:bench}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lc}
+\toprule
+Model & CV RMSE ($\log(1+\texttt{incwage})$) \\
+\midrule
+Ridge ($\alpha{=}2$) & $0.489$ \\
+Elastic Net & $0.522$ \\
+OLS & $0.490$ \\
+\bottomrule
+\end{tabular}
+\caption{Model benchmark on log wage (\texttt{results/model\_benchmark.csv}).}
+\label{tab:bench}
+\end{table}
+
+\section{Fairness metrics before mitigation}
+
+\subsection{Operationalization (Table~3)}
+\begin{itemize}\itemsep2pt
+\item \textbf{Demographic parity / selection spread:} spread of predicted high-income rate across groups; Fairlearn \texttt{demographic\_parity\_difference} with Female${}=1$ on the binary task.
+\item \textbf{Equalized odds:} Fairlearn \texttt{equalized\_odds\_difference}.
+\item \textbf{Equal opportunity:} TPR spread across groups from grouped binary rates.
+\item \textbf{Conditional statistical parity:} within each \texttt{sch} stratum, maximum spread of predicted high-income rate across sensitive groups (\texttt{csp\_max\_gap\_*}).
+\item \textbf{Fairness through unawareness (counterfactual flip):} mean $|\hat y(X)-\hat y(X')|$ when flipping \texttt{gender} / \texttt{race} on the validation dataframe (\texttt{fairness\_unawareness\_flip}).
+\item \textbf{Fairness through awareness (heuristic):} $k$NN in standardized numeric feature space; violation rate vs.\ a pooled $95$th percentile cutoff on $|\Delta\hat y|/\mathrm{dist}$ (\texttt{fairness\_awareness\_violation\_rate}). We also log the same statistic with $|\Delta\log(1{+}\hat y)|$ in the numerator (\texttt{awareness\_*\_log}) so the numerator aligns with the Ridge training target scale.
+\end{itemize}
+Extensions include overall and per-group RMSE/MAE, group RMSE spreads, mean prediction gaps, and min/max selection-rate ratios (\texttt{*\_di\_ratio\_minmax}).
+Metrics are computed on validation predictions from \texttt{eval\_before\_mitigation.py} (\texttt{results/fairness\_metrics\_before.csv}).
+
+\subsection{Baseline snapshot}
+Table~\ref{tab:beforeafter} (column \emph{Before}) summarizes the biased Ridge (\texttt{biased\_ridge\_full\_features}).
+Figure~\ref{fig:selrates} plots selection-related rates before mitigation.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\linewidth]{fairness_before_selection_rates.png}
+\caption{Fairness-related selection/TPR-style visualization before mitigation (\texttt{eval\_before\_mitigation.py}).}
+\label{fig:selrates}
+\end{figure}
+
+\section{Mitigation methods}
+
+Implemented in \texttt{mitigation.py} and \texttt{train\_mitigated.py}:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Reweighting:} inverse-frequency sample weights by \texttt{gender} when fitting Ridge (\texttt{reg\_\_sample\_weight}).
+\item \textbf{Structural unawareness:} remove \texttt{gender} and \texttt{race} from the feature matrix; refit preprocessor and Ridge (\texttt{unaware\_drop\_sensitive}).
+\item \textbf{Post-processing:} per-gender affine calibration in log-wage space on the holdout split (\texttt{GenderAffineCalibratedRegressor}): $\hat z' = a_g \hat z + b_g$ (\texttt{group\_affine\_calibrated}).
+\end{enumerate}
+
+\paragraph{Selection rule and rationale.}
+Let RMSE$_0$ be the biased Ridge validation RMSE on raw dollars.
+The factor $1.12$ is a deliberate \emph{accuracy slack}: it allows mitigated models to exceed the biased baseline RMSE by up to $12\%$ on validation so that strictly accuracy-dominant but less equitable candidates are not forced out of the feasible set.
+Among feasible runs we minimize $\mathrm{gender\_rmse\_spread}+\mathrm{race\_rmse\_spread}$ because the primary task is continuous wage regression; this sum measures how much typical prediction error varies across sensitive groups and complements Fairlearn DP/EO, which are defined on the binary high-income surrogate.
+
+All three candidates sit slightly above RMSE$_0$ ($\approx 39{,}687$), so no run meets $\mathrm{RMSE}\le \mathrm{RMSE}_0$ (Table~\ref{tab:selection_sens}).
+For multipliers $1.005$ and $1.01$, only \texttt{reweighted\_gender} and \texttt{group\_affine\_calibrated} are feasible, and the spread rule selects \texttt{group\_affine\_calibrated}; for $1.10$, $1.12$, and $1.15$, all three enter the feasible set and \texttt{unaware\_drop\_sensitive} wins on spread while offering the strongest DP/EO improvement (Table~\ref{tab:mitcompare}).
+Our reported choice uses $1.12$, which lies in a region where the selected model is stable for a range of looser caps but would change under tighter caps near $1\%$ slack---a sensitivity exported to \texttt{results/mitigation\_selection\_sensitivity.csv}.
+
+Among mitigated candidates with $\mathrm{RMSE}\le 1.12\times \mathrm{RMSE}_0$, we therefore choose the model minimizing $\mathrm{gender\_rmse\_spread}+\mathrm{race\_rmse\_spread}$.
+Table~\ref{tab:mitcompare} lists validation metrics for all three candidates.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l l}
+\toprule
+Cap ($\times\mathrm{RMSE}_0$) & Winner (min spread among feasible) \\
+\midrule
+$1.000$ & none feasible \\
+$1.005$, $1.010$ & \texttt{group\_affine\_calibrated} \\
+$1.100$, $1.120$, $1.150$ & \texttt{unaware\_drop\_sensitive} \\
+\bottomrule
+\end{tabular}
+\caption{Sensitivity of the selection rule to the RMSE cap (\texttt{train\_mitigated.py}, \texttt{results/mitigation\_selection\_sensitivity.csv}).}
+\label{tab:selection_sens}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model id & RMSE & $R^2$ & DP diff. & EO diff. \\
+\midrule
+\texttt{reweighted\_gender} & $39{,}948$ & $0.363$ & $0.380$ & $0.228$ \\
+\texttt{unaware\_drop\_sensitive} & $40{,}264$ & $0.352$ & $\mathbf{0.280}$ & $\mathbf{0.104}$ \\
+\texttt{group\_affine\_calibrated} & $39{,}743$ & $0.369$ & $0.379$ & $0.229$ \\
+\bottomrule
+\end{tabular}
+\caption{Mitigation candidates on validation (\texttt{results/mitigation\_comparison.csv}). DP/EO: Fairlearn gender metrics on the binary task. Lowest DP/EO correspond to \texttt{unaware\_drop\_sensitive}, which also minimizes gender${}+$race RMSE spread among feasible runs.}
+\label{tab:mitcompare}
+\end{table}
+
+\section{Fairness after mitigation}
+
+The selected model is \texttt{unaware\_drop\_sensitive} (\texttt{models/mitigated\_meta.json}).
+Table~\ref{tab:beforeafter} contrasts key metrics before and after; Figure~\ref{fig:cmp} shows the same comparison as two panels (wage/RMSE-spread in dollars vs.\ selection spreads and Fairlearn DP/EO on a $[0,1]$ scale) so small probability gaps are visible.
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+Phase & RMSE & MAE & $R^2$ & DP diff. & EO diff. & $\Delta$TPR (gend.) & CSP (gend.) & CSP (race) \\
+\midrule
+Before (biased Ridge) & $39{,}687$ & $16{,}196$ & $0.371$ & $0.385$ & $0.239$ & $0.239$ & $0.461$ & $0.238$ \\
+After (drop sensitive) & $40{,}264$ & $16{,}554$ & $0.352$ & $0.280$ & $0.104$ & $0.098$ & $0.347$ & $0.212$ \\
+\bottomrule
+\end{tabular}
+\caption{Selected fairness and accuracy metrics before vs.\ after mitigation (\texttt{fairness\_metrics\_before.csv}, \texttt{fairness\_metrics\_after.csv}). TPR column: gender TPR spread on the binary surrogate; CSP: conditional statistical parity max gap.}
+\label{tab:beforeafter}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fairness_before_after_comparison.png}
+\caption{Before/after bar comparison (\texttt{eval\_after\_mitigation.py}). \emph{Top:} RMSE, MAE, and group RMSE spreads (dollar scale). \emph{Bottom:} predicted high-income selection-rate spreads and Fairlearn demographic parity / equalized odds differences; these use a separate axis because they are $O(1)$ while wage errors are $O(10^4)$.}
+\label{fig:cmp}
+\end{figure*}
+
+\section{Test predictions and reproducibility}
+
+\texttt{predict.py} writes \texttt{submission.csv} (\texttt{id}, \texttt{incwage}) using \texttt{models/mitigated\_main.pkl}; if the mitigated pipeline omits sensitive columns, features are aligned automatically.
+
+\begin{verbatim}
+pip install -r requirements.txt
+python eda_bias.py
+python train_biased_main.py
+python eval_before_mitigation.py
+python train_mitigated.py
+python eval_after_mitigation.py
+python predict.py
+\end{verbatim}
+
+\section{Discussion and limitations}
+
+\paragraph{Accuracy--fairness trade-off.}
+Dropping sensitive features raises validation RMSE by about $1.5\%$ relative to the biased Ridge and lowers $R^2$, but reduces demographic parity difference, equalized odds difference, TPR spread, and CSP gaps (Table~\ref{tab:beforeafter}), consistent with the stated selection rule.
+
+\paragraph{Unawareness flip deltas after dropping sensitive attributes.}
+The flip diagnostic measures whether the \emph{fitted} model changes its prediction when \texttt{gender}/\texttt{race} labels are counterfactually swapped on the held-out table.
+After structural unawareness, those columns are not part of the feature matrix passed to \texttt{predict}; swapping them leaves the effective input unchanged, so the mean flip delta is \emph{trivially} zero.
+This does \textbf{not} mean the model is fair in the sense of independence from sensitive structure: it means the Table~3 flip metric is \textbf{not a valid way to judge} debiasing for this mitigation, because the test is disconnected from the model's inputs.
+We instead rely on group RMSE spreads, CSP, DP/EO on the binary task, and selection-rate gaps, which remain informative when sensitive attributes are omitted but still observed in evaluation.
+
+\paragraph{Fairness-through-awareness ratio (design issue and fix).}
+The ratio $|\Delta\hat y|/\mathrm{dist}$ mixes \textbf{incompatible quantities}: neighbor distances are Euclidean on \emph{standardized} numeric covariates (dimensionless, can be arbitrarily small), while the legacy numerator uses raw dollar gaps.
+That \textbf{unit mismatch} is a flaw in how the scalar is constructed---not a quirk of one run---so median ratios on the order of $10^{13}$ should not be read as a meaningful ``awareness magnitude.''
+The pooled \texttt{awareness\_violation\_rate} (here $0.05$) is less sensitive to that pathology because it is a relative tail frequency.
+\textbf{Remediation:} compute $|\Delta\log(1{+}\hat y)|$ in the numerator (matching the log target used in training) and/or redefine neighbor distance in a scale aligned with the outcome; we now log \texttt{awareness\_median\_pred\_dist\_ratio\_log} alongside the legacy field (e.g.\ $\sim 10^{13}$ dollars vs.\ $\sim 10^{8}$--$10^{9}$ on the mitigated validation run---still distance-dominated but far less extreme), and recommend reporting log-space ratios or alternative awareness tests if cross-run comparability matters.
+
+\paragraph{Proxy discrimination and limited CSP movement on race.}
+Dropping \texttt{gender}/\texttt{race} removes direct channels but leaves strong proxies: Table~\ref{tab:proxy_assoc} and Figure~\ref{fig:eda_proxy} show that occupation and industry co-vary sharply with both sensitive attributes, and education and region co-vary with race.
+A model can therefore encode race- and gender-correlated patterns through these fields, which helps explain why CSP on race falls only from $0.238$ to $0.212$ ($\approx 11\%$ relative reduction) despite removing explicit race---residual stratification along industry and occupation keeps predicted high-income rates apart across race within some \texttt{sch} strata.
+
+\paragraph{Other caveats.}
+High-cardinality one-hot encoding; kNN awareness uses numeric features only; affine calibration uses a single holdout split.
+
+\section{Conclusion}
+
+We documented dataset bias (including proxy--sensitive associations), trained biased and mitigated wage models, evaluated Table~3 and extension metrics, and selected \texttt{unaware\_drop\_sensitive} under a $12\%$ RMSE cap and spread-minimization rule, with sensitivity summarized in Table~\ref{tab:selection_sens}.
+Fairness metrics improved alongside a small validation RMSE increase; the unawareness flip statistic is non-informative after feature removal, and the kNN median ratio should be interpreted only with log-scale numerators or redesigned distances.
+
+\begin{thebibliography}{9}
+\bibitem{fairlearn}
+H.~Bird \emph{et al.}
+\newblock Fairlearn: A toolkit for assessing and improving fairness in AI.
+\newblock \url{https://github.com/fairlearn/fairlearn}, 2020.
+
+\bibitem{sklearn}
+F.~Pedregosa \emph{et al.}
+\newblock Scikit-learn: Machine learning in Python.
+\newblock \textit{JMLR} 12 (2011), 2825--2830.
+\end{thebibliography}
+
+\end{document}

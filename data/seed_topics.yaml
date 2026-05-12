@@ -1,0 +1,54 @@
+# 50 neutral English seed topics used to build Space-L. They are chosen to be
+# domain-general (no single persona's style should dominate the "correct"
+# answer) and to cover both concrete and abstract subjects.
+topics:
+  - Describe an autumn morning in a small town.
+  - Explain Newton's first law of motion.
+  - Recount the feeling of saying goodbye at an airport.
+  - Outline what photosynthesis does for a plant.
+  - Describe a cup of tea cooling on a wooden table.
+  - Explain why people dream.
+  - Narrate a walk through an unfamiliar city at night.
+  - Describe the texture and behaviour of sand under bare feet.
+  - Summarise the central idea of natural selection.
+  - Recount the last five minutes before a storm arrives.
+  - Describe the experience of opening a book you loved as a child.
+  - Explain how the seasons change over a year.
+  - Narrate the moment a long-awaited letter finally arrives.
+  - Describe a violin being tuned backstage.
+  - Summarise what makes a bridge stand up.
+  - Recount watching a kite fall out of the sky.
+  - Describe the inside of an old library at dusk.
+  - Explain the water cycle.
+  - Describe the face of someone deep in thought.
+  - Recount a friendship that ended without argument.
+  - Describe the scent of rain on hot pavement.
+  - Summarise what electricity is.
+  - Narrate preparing a meal after a difficult day.
+  - Describe the silence after heavy snowfall.
+  - Explain what gravity does.
+  - Recount the moment an idea finally makes sense.
+  - Describe children playing in a park at sunset.
+  - Explain the concept of probability using coin tosses.
+  - Describe the feeling of returning to a childhood home.
+  - Narrate waiting in line at a post office.
+  - Describe the surface of a still lake.
+  - Summarise what makes something a planet.
+  - Recount the moment a musician walks onto a stage.
+  - Describe fog rolling through a valley.
+  - Explain how evolution selects for traits over generations.
+  - Describe the movement of leaves in the wind.
+  - Recount learning to ride a bicycle.
+  - Describe a train disappearing into a tunnel.
+  - Explain how a seed becomes a tree.
+  - Narrate the experience of losing a familiar object.
+  - Describe a painting you cannot stop looking at.
+  - Summarise the role of the sun in climate.
+  - Recount a small act of kindness from a stranger.
+  - Describe the inside of a workshop mid-project.
+  - Explain how memory changes over time.
+  - Describe the stillness of early morning before anyone wakes.
+  - Summarise how a simple machine amplifies force.
+  - Recount a conversation remembered word-for-word years later.
+  - Describe the sky during a slow thunderstorm.
+  - Explain what makes a language change over centuries.

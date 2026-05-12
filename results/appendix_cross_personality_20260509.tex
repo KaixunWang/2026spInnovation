@@ -1,0 +1,234 @@
+% Appendix: boxed ``system / user'' prompt cards (cf. ranking-prompt appendix style).
+\begingroup\sloppy
+
+\section{Appendix A: Prompt templates (boxed layout)}
+\label{app:prompts}
+
+\noindent\textbf{Implementation note.}
+Full discrete persona bodies, coordinate-scorer definitions, and paraphrase variants live in the project's configuration; generation, mechanism, judging, and experiment orchestration follow the accompanying open-source implementation in the repository.
+
+\subsection{A.1 Main arms: T0--T3 rewrites}
+
+\subsubsection{T0 --- Identity (measurement floor)}
+\begin{DefnBox}{Pipeline note}
+No LLM call: the stored row is the source text verbatim with $d_H{=}0$. No system/user messages.
+\end{DefnBox}
+
+\subsubsection{T1--T3 discrete --- Joint generator (\texttt{rewrite\_joint})}
+\begin{PromptSystemBox}{Rewrite / Joint --- System input}
+\footnotesize
+\texttt{<persona.system\_prompt>} from the persona configuration (primary or paraphrase variant), plus the length line \texttt{Target length: L--H words.}
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Rewrite / Joint --- User input}
+\LstPrompt{rewrite_user_template.txt}
+\end{PromptUserBox}
+
+\subsubsection{T3 continuous target --- Synthetic persona header}
+Continuous sampling builds a lightweight synthetic persona header; numeric $S,R$ are filled per draw. The user message is the same joint wrapper as above.
+\begin{PromptSystemBox}{Rewrite / Continuous T3 --- System input (pattern)}
+\bgroup\color{white}\footnotesize\ttfamily\raggedright
+Adopt this continuous style target in Space-H: S=+0.000, R=+0.000.\par
+Lean toward rational and adventurous expression proportionally to magnitudes.\par
+\egroup
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Rewrite / Continuous T3 --- User input}
+\LstPrompt{rewrite_user_template.txt}
+\end{PromptUserBox}
+
+\subsection{A.2 Mechanism arms: M0--M3}
+
+\subsubsection{M1 --- Joint (same as main joint)}
+One-shot \texttt{rewrite\_joint}: system $=$ persona $+$ length; user $=$ shared wrapper (Section~A.1).
+
+\subsubsection{M2 --- Sequential paraphrase then persona}
+\begin{PromptSystemBox}{Mechanism M2 / Stage 1 --- System input}
+\bgroup\color{white}\footnotesize\ttfamily\raggedright
+You are a faithful paraphraser. You restate the source's propositional content in neutral, unadorned English prose. Do not add, remove, or alter any commitment of the source. Keep the length within 90--110\% of the source.\par
+\egroup
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Mechanism M2 / Stage 1 --- User input}
+\LstPrompt{paraphrase_user.txt}
+\end{PromptUserBox}
+\begin{PromptSystemBox}{Mechanism M2 / Stage 2 --- System input}
+\footnotesize
+\texttt{<persona.system\_prompt>} $+$ length constraint (same as joint).
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Mechanism M2 / Stage 2 --- User input}
+\LstPrompt{m2_stage2_user_template.txt}
+\end{PromptUserBox}
+
+\subsubsection{M3 --- Checklist-constrained joint}
+\begin{PromptSystemBox}{Mechanism M3 / Checklist extraction --- System input}
+\bgroup\color{white}\footnotesize\ttfamily\raggedright
+You are a careful reading-comprehension assistant. From the passage below, extract a numbered checklist of its propositional commitments (factual claims, causal links, and concrete imagery) that any faithful rewrite must preserve. Be concise.\par
+\egroup
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Mechanism M3 / Checklist extraction --- User input}
+\LstPrompt{checklist_user.txt}
+\end{PromptUserBox}
+\begin{PromptSystemBox}{Mechanism M3 / Persona + checklist --- System input}
+\footnotesize
+\texttt{<persona.system\_prompt>} $+$ length, followed by the injected checklist banner (trimmed to a word budget).
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Mechanism M3 --- Checklist banner appended to system block}
+\LstPrompt{m3_inject_header.txt}
+\end{PromptUserBox}
+\begin{PromptUserBox}{Mechanism M3 --- User message (same as joint)}
+\LstPrompt{rewrite_user_template.txt}
+\end{PromptUserBox}
+
+\subsubsection{M0 --- Checklist control (token-pressure placebo)}
+Checklist is still extracted for auditing, but the text appended to the persona system block is a length-matched placeholder list (control path).
+\begin{PromptUserBox}{Mechanism M0 --- Control banner (system block append)}
+\LstPrompt{m0_control_header.txt}
+\end{PromptUserBox}
+\begin{PromptUserBox}{Mechanism M0 --- User message (same as joint)}
+\LstPrompt{rewrite_user_template.txt}
+\end{PromptUserBox}
+
+\subsection{A.3 Judge prompts (absolute and pairwise)}
+
+\subsubsection{Absolute rubric (seven Likert dimensions)}
+\begin{PromptSystemBox}{Judge / Absolute --- System input}
+\texttt{You are a strict JSON-only literary judge.}
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Judge / Absolute --- User input}
+\LstPrompt{judge_absolute_user.txt}
+\end{PromptUserBox}
+\begin{DefnBox}{JSON parsing and aggregation}
+Judge completions are parsed as JSON. Each Likert dimension is clipped to $[1,5]$; per-dimension scores are averaged across judges with valid JSON. A generous token ceiling is used for JSON-shaped outputs.
+\end{DefnBox}
+
+\subsubsection{Pairwise creative comparison}
+\begin{PromptSystemBox}{Judge / Pairwise --- System input}
+\texttt{You are a strict JSON-only literary judge.}
+\end{PromptSystemBox}
+\begin{PromptUserBox}{Judge / Pairwise --- User input}
+\LstPrompt{judge_pairwise_user.txt}
+\end{PromptUserBox}
+\begin{DefnBox}{Pairwise scoring note}
+\texttt{REWRITE\_A}/\texttt{B} presentation order is randomised; signed scores are mapped back to ``A vs.\ B'' after accounting for order.
+\end{DefnBox}
+
+\subsection{A.4 Coordinate scorer (LLM backend only)}
+When the coordinate backend is LLM-based, sources are rated with the scorer prompt in the persona configuration (integer $S,R\in[-5,5]$, JSON with reasons, then normalise to $[-1,1]$). The runs analysed in the main text use the deterministic HF backend; the LLM configuration branch still documents axis semantics for reviewers.
+
+\section{Appendix B: Automatic metric definitions}
+\label{app:metrics}
+
+\begin{DefnBox}{B.1 Novelty N-auto (combined channel)}
+Let $c^{\mathrm{d2}}_{\mathrm{rel}}$, $c^{\mathrm{bg}}_{\mathrm{rel}}$, $c^{\mathrm{emb}}_{\mathrm{rel}}$ be genre-relative scores in $[0,1]$. Then
+\[
+  N_{\mathrm{auto}} = \tfrac{1}{3}\bigl(c^{\mathrm{d2}}_{\mathrm{rel}} + c^{\mathrm{bg}}_{\mathrm{rel}} + c^{\mathrm{emb}}_{\mathrm{rel}}\bigr).
+\]
+Distinct-2: $z$-score vs.\ genre source mean/std, clip $z\in[-3,3]$, rebound $(z/3+1)/2$. Bigram novelty: offset vs.\ genre baseline with heuristic spread $\sigma{=}0.1$, same clip/rebound. Embedding channel: neutral $0.5$ when SBERT is off; else normalised vs.\ intra-genre mean pairwise distance with clipping.
+\end{DefnBox}
+
+\begin{DefnBox}{B.2 Value $V_{\mathrm{auto}}$}
+Coherence maps GPT-2 perplexity through a monotone pivot map (default pivot 80). Let $e$ be NLI entailment in $[0,1]$ and $c$ coherence in $[0,1]$. Primary value is the arithmetic mean $(e+c)/2$. Geometric value uses $\sqrt{e\cdot c}$ with a zero guard.
+\end{DefnBox}
+
+\begin{DefnBox}{B.3 Creativity variants}
+$C_{\mathrm{auto}}=N_{\mathrm{auto}}\cdot V_{\mathrm{arith}}$ (clipped factors); $C_{\mathrm{auto,geom}}=N_{\mathrm{auto}}\cdot V_{\mathrm{geom}}$. Winsorised diagnostics multiply winsorised novelty by arithmetic value in the same analysis protocol as the main tables.
+\end{DefnBox}
+
+\section{Appendix C: Statistical robustness}
+\label{app:robust}
+
+\subsection{C.1 Pooled quadratic: OLS vs.\ mixed-effects}
+Rows match Table~\ref{tab:quadratic}: discrete main, continuous main, and mechanism arms only ($n{=}4620$ with finite $d_H$ and outcomes). Mixed models add a random intercept by source text; optimiser order matches the main analysis script defaults.
+
+\begin{table}[t]
+\centering
+\begin{tcolorbox}[
+  width=\linewidth,
+  enhanced, arc=2mm, colback=white, colframe=black,
+  title={\texorpdfstring{\textbf{Table C.1.} OLS vs.\ MixedLM on $\beta_{d^2}$ (conflict quadratic)}{\textbf{Table C.1.} OLS vs. MixedLM on beta d2 (conflict quadratic)}},
+  fonttitle=\bfseries\small, titlerule=0.55pt, boxrule=0.95pt, boxsep=3mm]
+\small
+\noindent\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l l r r r@{}}
+\toprule
+Metric & Model & $n$ & $\beta_{d^2}$ & $p(d^2)$ \\
+\midrule
+Creativity auto & MixedLM (L-BFGS, REML) & 4620 & $-0.1111$ & $4.58{\times}10^{-7}$ \\
+Creativity auto & OLS (same FE)        & 4620 & $-0.1072$ & $5.97{\times}10^{-5}$ \\
+Novelty (combined) & MixedLM (L-BFGS, REML) & 4620 & $0.0908$ & $1.90{\times}10^{-6}$ \\
+Novelty (combined) & OLS (same FE)        & 4620 & $0.1143$ & $1.37{\times}10^{-5}$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{tcolorbox}
+\caption{Quadratic conflict coefficient: sign and significance are stable across OLS and mixed-effects estimators on the pooled main$+$mechanism sample.}
+\label{tab:appendix-robust-reg}
+\end{table}
+
+\subsection{C.2 T3--T2 gaps under alternative $d_H$ binning}
+\begin{table}[t]
+\centering
+\begin{tcolorbox}[
+  width=\linewidth,
+  enhanced, arc=2mm, colback=white, colframe=black,
+  title={\texorpdfstring{\textbf{Table C.2.} Mean $C_{\mathrm{auto}}$ difference (T3 minus T2) by bucket}{\textbf{Table C.2.} Mean C auto difference (T3 minus T2) by bucket}},
+  fonttitle=\bfseries\small, titlerule=0.55pt, boxrule=0.95pt, boxsep=3mm]
+\small
+\noindent\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+Binning scheme & low: T3$-$T2 & mid: T3$-$T2 & high: T3$-$T2 \\
+\midrule
+Quantile tertiles & $-0.0009$ & $-0.0061$ & $-0.0078$ \\
+Equal-width 3 bins & ---       & $-0.0102$ & $-0.0017$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{tcolorbox}
+\caption{Mean $C_{\mathrm{auto}}$ gaps (T3 minus T2) inside conflict buckets on the same $n{=}4620$ pool; negative values match the main text's ``T3 does not beat T2'' pattern under both binning rules where defined.}
+\label{tab:appendix-robust-bin}
+\end{table}
+
+\section{Appendix D: Structural collapse risk (exploratory GEE)}
+\label{app:collapse}
+
+This appendix reproduces the exploratory \textbf{structural collapse} analysis deferred from the main text's conflict-intensity section.
+
+\subsection{D.1 Indicator and GEE specification}
+\begin{DefnBox}{D.1 Collapse event (sample-relative)}
+$\mathrm{collapse}{=}1$ iff $\mathrm{NLI}{<}\tau_{\mathrm{NLI}}$ and $\mathrm{coherence}_{\mathrm{auto}}{<}\tau_{\mathrm{coh}}$, with $\tau_{\cdot}$ at the \textbf{same-sample 20th percentiles} on the $n{=}1440$ proprietary T3 discrete rows (same pool as judge-divergence and surprise regressions).
+\end{DefnBox}
+\noindent
+This yields $\tau_{\mathrm{NLI}}{\approx}0.412$, $\tau_{\mathrm{coh}}{\approx}0.628$, and baseline $\hat P(\mathrm{collapse}){\approx}1.9\%$.
+Because statsmodels does not expose a standard logit GLMM with Gaussian random intercepts alongside our Gaussian mixed models, we fit a \textbf{binomial GEE} with clustering by source text and exchangeable working correlation (fallback independence); the estimand is marginal (population-averaged) risk.
+The genre-inclusive specification $\mathrm{collapse}{\sim}d{+}d^2{+}C(\mathrm{genre})$ shows quasi-separation in narrative/poetry strata; we therefore emphasise the \emph{no-genre} robustness fit for marginal probabilities.
+On a fine $d_H$ grid, implied $P(\mathrm{collapse})$ rises from $\approx 3.5\%$ at $d_H{\approx}0.22$ to $\approx 88\%$ at $d_H{\approx}0.88$, with the steepest increase near $d_H{\approx}0.83$; the quadratic term remains significant at $p{\approx}0.003$.
+Table~\ref{tab:appendix_collapse_gee} summarises the headline marginal diagnostics.
+Full log-odds coefficient tables, the genre-inclusive sensitivity fit, Hessian/convergence metadata, and a median-threshold ($q{=}0.5$) variant are archived with the supplementary regression output for this appendix.
+
+\begin{table}[t]
+\centering
+\begin{tcolorbox}[
+  width=\linewidth,
+  enhanced, arc=2mm, colback=white, colframe=black,
+  title={\texorpdfstring{\textbf{Table D.1.} Marginal $P(\mathrm{collapse})$ diagnostics (no-$C(\mathrm{genre})$ GEE, $q{=}0.2$)}{\textbf{Table D.1.} Marginal P collapse diagnostics}},
+  fonttitle=\bfseries\small, titlerule=0.55pt, boxrule=0.95pt, boxsep=3mm]
+\small
+\noindent\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l r@{}}
+\toprule
+Diagnostic & Value \\
+\midrule
+Rows ($n$) & 1440 \\
+Baseline $\hat P(\mathrm{collapse})$ & ${\approx}1.9\%$ \\
+$\hat P(\mathrm{collapse})$ at $d_H{\approx}0.22$ & ${\approx}3.5\%$ \\
+$\hat P(\mathrm{collapse})$ at $d_H{\approx}0.88$ & ${\approx}88\%$ \\
+$d_H$ at maximum slope of $\hat P$ & ${\approx}0.83$ \\
+$p(d_H^2)$ (quadratic term) & ${\approx}0.0032$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{tcolorbox}
+\caption{Structural-collapse risk: marginal fitted probabilities on $d_H$ (binomial GEE with clustering by source). Log-odds coefficients are omitted because they become large whenever $\hat P$ spans nearly the unit interval; full coefficient tables accompany the supplementary materials.}
+\label{tab:appendix_collapse_gee}
+\end{table}
+
+\endgroup

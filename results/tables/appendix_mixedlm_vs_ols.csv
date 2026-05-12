@@ -1,0 +1,5 @@
+metric,model,n,beta_d2,p_d2
+creativity_auto,OLS,4620,-0.10718050121404427,5.9728965886857293e-05
+creativity_auto,"MixedLM(lbfgs, reml=True)",4620,-0.11107071508916506,4.582312843197275e-07
+novelty_auto_combined,OLS,4620,0.11425570195435164,1.3654660437921664e-05
+novelty_auto_combined,"MixedLM(lbfgs, reml=True)",4620,0.09082827129370541,1.9010972375259966e-06

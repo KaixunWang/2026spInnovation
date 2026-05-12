@@ -1,0 +1,5 @@
+.env
+innovation_upload.tar.gz
+.venv/
+venv/
+models/

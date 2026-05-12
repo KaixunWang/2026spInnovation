@@ -1,0 +1,6 @@
+SOURCE TEXT (genre: {GENRE}):
+---
+{SOURCE}
+---
+
+Provide a neutral, faithful paraphrase. Output only the paraphrase.

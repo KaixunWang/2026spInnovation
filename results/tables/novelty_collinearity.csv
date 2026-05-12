@@ -1,0 +1,4 @@
+feature_a,feature_b,pearson_r,abs_r,flag_gt_0_8
+distinct2_rel,novel_ngram_rel,-0.3248920431691018,0.3248920431691018,False
+distinct2_rel,embedding_distance_rel,,,False
+novel_ngram_rel,embedding_distance_rel,,,False

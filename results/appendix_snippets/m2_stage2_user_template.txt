@@ -1,0 +1,10 @@
+You will receive a neutral paraphrase of a source passage.
+Rewrite it according to your persona. Preserve every propositional
+commitment.
+
+NEUTRAL PARAPHRASE:
+---
+<paraphrase from stage 1>
+---
+
+Output only the rewritten text.

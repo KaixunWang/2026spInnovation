@@ -1,0 +1,9 @@
+---
+id: academic_02
+genre: academic
+source: gfissore/arxiv-abstracts-2021::astro-ph/0509579
+license: research-use
+length: 247
+note: auto-selected abstract; top_category=astro-ph
+---
+High-z Type Ia supernovae are expected to be gravitationally lensed by the foreground distribution of large-scale structure. The resulting magnification of supernovae is statistically measurable, and the angular correlation of the magnification pattern directly probes the integrated mass density along the line of sight. Measurements of cosmic magnification of supernovae therefore complements galaxy shear measurements in providing a direct measure of clustering of the dark matter. As the number of supernovae is typically much smaller than the number of sheared galaxies, the two-point correlation function of lensed Type Ia supernovae suffers from significantly increased shot noise. Neverthless, we find that the magnification map of a large sample of supernovae, such as that expected from next generation dedicated searches, will be easily measurable and provide an important cosmological tool. For example, a search over 20 sq. deg. over five years leading to a sample of ~ 10,000 supernovae would measure the angular power spectrum of cosmic magnification with a cumulative signal-to-noise ratio of ~20. This detection can be further improved once the supernova distance measurements are cross-correlated with measurements of the foreground galaxy distribution. The magnification maps made using supernovae can be used for important cross-checks with traditional lensing shear statistics obtained in the same fields, as well as help to control systematics. We discuss two applications of supernova magnification maps: the breaking of the mass-sheet degeneracy when estimating masses of shear-detected clusters, and constraining the second-order corrections to weak lensing observables.

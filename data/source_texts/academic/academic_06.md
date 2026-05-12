@@ -1,0 +1,9 @@
+---
+id: academic_06
+genre: academic
+source: gfissore/arxiv-abstracts-2021::1809.08612
+license: research-use
+length: 259
+note: auto-selected abstract; top_category=cond-mat
+---
+We study a relativistic quantum cavity system realized by etching out from a graphene sheet by quantum transport measurements and theoretical calculations. The conductance of the graphene cavity has been measured as a function of the back gate voltage (or the Fermi energy) and the magnetic field applied perpendicular to the graphene sheet, and characteristic conductance contour patterns are observed in the measurements. In particular, two types of high conductance contour lines, i.e., straight and parabolic-like high conductance contour lines, are found in the measurements. The theoretical calculations are performed within the framework of tight-binding approach and Green's function formalism. Similar characteristic high conductance contour features as in the experiments are found in the calculations. The wave functions calculated at points selected along a straight conductance contour line are found to be dominated by a chain of scars of high probability distributions arranged as a necklace following the shape of cavity and the current density distributions calculated at these point are dominated by an overall vortex in the cavity. These characteristics are found to be insensitive to increasing magnetic field. However, the wave function probability distributions and the current density distributions calculated at points selected along a parabolic-like contour line show a clear dependence on increasing magnetic field, and the current density distributions at these points are characterized by the complex formation of several localized vortices in the cavity. Our work brings a new insight into quantum chaos in relativistic particle systems and would greatly stimulate experimental and theoretical efforts towards this still emerging field.

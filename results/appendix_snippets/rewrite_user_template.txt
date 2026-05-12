@@ -1,0 +1,8 @@
+SOURCE TEXT (genre: {GENRE}):
+---
+{SOURCE}
+---
+
+Rewrite the source above according to the instructions you were given.
+Preserve every propositional/content commitment. Output only the rewritten
+text, without commentary or headers.

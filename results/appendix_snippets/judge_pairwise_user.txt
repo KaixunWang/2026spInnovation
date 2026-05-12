@@ -1,0 +1,15 @@
+You are an expert literary reviewer. Given a source text of genre {GENRE} and two unlabeled rewrites A and B, pick which rewrite is more creative *for that genre*, considering both freshness of expression AND preservation of content.
+
+If one rewrite loses content or becomes incoherent, prefer the other.
+
+SOURCE (genre: {GENRE}):
+{SOURCE}
+
+REWRITE A:
+{REWRITE_A}
+
+REWRITE B:
+{REWRITE_B}
+
+Respond as STRICT JSON with one of five verdicts (A_much_better / A_slightly_better / tie / B_slightly_better / B_much_better):
+{"verdict": "<one of: A_much_better|A_slightly_better|tie|B_slightly_better|B_much_better>", "reason": "<one sentence>"}

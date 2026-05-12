@@ -1,0 +1,3 @@
+The following numbered items are REQUIRED to survive the rewrite
+(do not remove, contradict, or alter them):
+<checklist from extraction call>
