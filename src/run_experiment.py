@@ -342,6 +342,11 @@ def cmd_main(args: argparse.Namespace) -> int:
     scores = _coord_scores(sources)
 
     generators = get_role_models("generators")
+    if args.generator_names:
+        generators = []
+        for name in args.generator_names:
+            get_model_spec(name)  # validate model name early
+            generators.append(name)
     if _coord_scoring_backend() != "hf":
         coord_model = get_role_models("coordinate_scorer")[0]
         # Compare with PRIMARY generator family; with mixed-family generator lists
@@ -1079,6 +1084,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--limit-per-genre", type=int, default=None)
     sp.add_argument("--n-repeat", type=int, default=None)
     sp.add_argument("--max-generators", type=int, default=None)
+    sp.add_argument(
+        "--generator-names",
+        nargs="+",
+        default=None,
+        help="explicit generator model names to use for this run (e.g. gen_qwen3_4b)",
+    )
     sp.add_argument("--output-name", type=str, default=None)
     sp.add_argument("--append-output", action="store_true", help="append to output jsonl instead of replacing")
     sp.add_argument("--genres", nargs="*", default=None, help="run only specified genres (e.g. academic narrative)")
