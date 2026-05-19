@@ -1,4 +1,4 @@
-"""Qwen 4B / 8B hypothesis checks H1, H3–H7 on main_qwen3_*_metrics.jsonl.
+"""Qwen 4B / 8B / 14B hypothesis checks H1, H3–H7 on main_qwen3_*_metrics.jsonl.
 
 Writes tidy rows to results/tables/qwen_h_full_analysis.csv
 
@@ -26,10 +26,11 @@ from src.io_utils import read_jsonl  # noqa: E402
 from src.metrics.jsd import word_jsd_normalized  # noqa: E402
 
 METRIC = "creativity_auto"
-MODELS = ("gen_qwen3_4b", "gen_qwen3_8b")
+MODELS = ("gen_qwen3_4b", "gen_qwen3_8b", "gen_qwen3_14b")
 FILES = {
     "gen_qwen3_4b": PROJECT_ROOT / "data" / "generated" / "main_qwen3_4b_metrics.jsonl",
     "gen_qwen3_8b": PROJECT_ROOT / "data" / "generated" / "main_qwen3_8b_metrics.jsonl",
+    "gen_qwen3_14b": PROJECT_ROOT / "data" / "generated" / "main_qwen3_14b_metrics.jsonl",
 }
 OUT_CSV = PROJECT_ROOT / "results" / "tables" / "qwen_h_full_analysis.csv"
 

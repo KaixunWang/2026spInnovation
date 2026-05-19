@@ -71,6 +71,22 @@ def _cache_key(provider: str, model_id: str, system: str, user: str, params: dic
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _coerce_openai_create_extras(
+    provider: str,
+    extras: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Merge provider defaults; DeepSeek APIs default thinking on for many models."""
+    if provider != "deepseek":
+        return extras
+    out: dict[str, Any] = dict(extras) if extras else {}
+    eb = dict(out.get("extra_body") or {})
+    thinking = eb.get("thinking")
+    if not isinstance(thinking, dict) or thinking.get("type") != "enabled":
+        eb["thinking"] = {"type": "disabled"}
+    out["extra_body"] = eb
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Provider backends
 # ---------------------------------------------------------------------------
@@ -294,7 +310,7 @@ def generate(
     raw_extras = spec.get("openai_create_extras")
     if raw_extras is not None and not isinstance(raw_extras, dict):
         raise ProviderError(f"Model {model_name!r}: openai_create_extras must be a mapping if set")
-    openai_create_extras: dict[str, Any] | None = dict(raw_extras) if raw_extras else None
+    openai_create_extras = _coerce_openai_create_extras(provider, dict(raw_extras) if raw_extras else None)
 
     params = {"temperature": temperature, "max_tokens": max_tokens, "top_p": top_p}
     if openai_create_extras:

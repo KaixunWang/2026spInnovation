@@ -19,7 +19,7 @@
 families:
   openai:     [gpt-4o, gpt-4o-mini, text-embedding-3-large, text-embedding-3-small]
   anthropic:  [claude-3-5-sonnet-latest, claude-3-5-haiku-latest]
-  deepseek:   [deepseek-v4-pro]
+  deepseek:   [deepseek-v4-pro, deepseek-chat]
   dashscope:  [qwen-max, qwen-plus, qwen3.5-flash, text-embedding-v3]
   zhipu:      [glm-4-plus]
   moonshot:   [moonshot-v1-32k]
@@ -85,17 +85,17 @@ models:
     temperature: 0.0
     max_tokens: 700
 
-  - name: judge_deepseek_v4_pro
+  # deepseek-chat + explicit thinking off (see also generator._coerce_openai_create_extras).
+  - name: judge_deepseek_chat
     provider: deepseek
-    model_id: deepseek-v4-pro
+    model_id: deepseek-chat
     role: judge
     temperature: 0.0
-    max_tokens: 2048
-    # Rubric is a short JSON blob; disable V4 thinking so tokens stay in message.content.
+    max_tokens: 1024
     openai_create_extras:
       extra_body:
         thinking:
-          type: "disabled"
+          type: disabled
 
   # --- Coordinate scorer (rates source texts on S and R axes) ---
   - name: coord_openai_mini
@@ -136,10 +136,9 @@ models:
 #
 # Cross-family judges (recommended): mix providers so aggregates are not single-vendor.
 roles:
-  # Generators: OpenAI. Judges: DeepSeek + OpenAI (distinct families).
-  # Set DEEPSEEK_API_KEY (+ DEEPSEEK_BASE_URL if needed). Coord/embedder unchanged.
+  # Generators: OpenAI. Judges: DeepSeek Chat + gpt-4o (both non-reasoning).
   # Still use ALLOW_SAME_FAMILY_COORD=1 if coord_scorer shares OpenAI family with generators.
   generators:        [gen_openai_4o, gen_openai_mini]
-  judges:            [judge_deepseek_v4_pro, judge_openai_4o]
+  judges:            [judge_deepseek_chat, judge_openai_4o]
   coordinate_scorer: coord_openai_mini
   embedder:          embed_openai_3_large
