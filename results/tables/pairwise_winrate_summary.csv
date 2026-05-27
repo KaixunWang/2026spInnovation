@@ -1,0 +1,4 @@
+metrics_file,generator_model,field,n_rows,n_valid,win_rate,tie_rate,loss_rate,mean_score
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,creval_winrate,720,0,,,,
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,creval_winrate,720,0,,,,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,creval_winrate,720,0,,,,

@@ -69,15 +69,25 @@ finetuning_type: lora
 
 ## 3. 启动 CrEval API
 
-在 CrEval 仓库目录：
+你当前环境推荐在 WSL 中启动（你已经验证 Windows 本地直接跑会更慢）。
 
-```powershell
-$env:API_PORT = "8000"
-$env:CUDA_VISIBLE_DEVICES = "0"
-llamafactory-cli api creval_api.yaml
+在 WSL 的 CrEval 目录：
+
+```bash
+cd /mnt/f/2026spInnovation/CrEval
+export CREVAL_API_BASE_URL=http://127.0.0.1:8000/v1
+export CREVAL_API_MODEL=gpt-3.5-turbo
+export CREVAL_API_TIMEOUT=1200
+export API_VERBOSE=0
+
+# 启动 API server（推荐）
+API_PORT=8000 CUDA_VISIBLE_DEVICES=0 llamafactory-cli api creval_api.yaml
 ```
 
 服务起来之后，保持这个终端不要关。
+
+说明：`inference.py` 是交互客户端，不是 API server。批量评分由主仓库脚本自动调用 HTTP API 完成，不需要手工逐条输入。
+`API_VERBOSE=0` 可以关闭请求体大段日志，只保留一行访问日志。
 
 ## 4. 可选：先做一次官方交互测试
 
@@ -90,6 +100,13 @@ python inference.py
 
 随便输入一个 query 和两个 response，确认服务正常返回。
 
+也可在 Windows 侧做连通性检查：
+
+```powershell
+Test-NetConnection -ComputerName 127.0.0.1 -Port 8000
+python -c "import httpx; print(httpx.get('http://127.0.0.1:8000/v1/models', timeout=3.0).status_code)"
+```
+
 ## 5. 回到当前项目，填写 .env
 
 当前项目根目录的 .env 至少加上这三行：
@@ -97,12 +114,13 @@ python inference.py
 ```env
 CREVAL_API_KEY=0
 CREVAL_BASE_URL=http://127.0.0.1:8000/v1
-CREVAL_MODEL_NAME=meta-llama/Meta-Llama-3-8B-Instruct
+CREVAL_MODEL_NAME=gpt-3.5-turbo
+CREVAL_API_TIMEOUT=1200
 ```
 
 说明：
 
-- 这三个值对应的是上游 inference.py 的默认写法
+- 新脚本也兼容上游变量名 `CREVAL_API_BASE_URL` 与 `CREVAL_API_MODEL`
 - 如果你的服务端口不是 8000，只改 CREVAL_BASE_URL
 
 ## 6. 先做一次 dry-run 检查配对
@@ -133,7 +151,7 @@ Remove-Item data/generated/main_qwen3_4b_creval.jsonl
 ## 7. 正式跑 CrEval 批量评分
 
 ```powershell
-python scripts/score_existing_results_with_creval.py --reference-model gen_openai_4o --overwrite
+python scripts/score_existing_results_with_creval.py --reference-model gen_openai_4o --overwrite --retries 8 --sleep-seconds 2.0
 ```
 
 默认会对三份 Qwen 小模型 metrics 文件执行评分，并写出三份 *_creval.jsonl。
@@ -149,6 +167,11 @@ python scripts/score_existing_results_with_creval.py --reference-model gen_opena
 - 1.0：Qwen 胜
 - 0.5：平
 - 0.0：Qwen 负
+
+如果遇到偶发 502：
+
+- 脚本会先自动重试；超过重试后会把该条写成 `reason=request_error`，不会整批中断。
+- 可重复执行同一命令（`--overwrite`）进行补跑。
 
 ## 8. 合并到现有 metrics
 

@@ -1,0 +1,13 @@
+metrics_file,generator_model,genre,field,n_rows,n_valid,win_rate,tie_rate,loss_rate,mean_score
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,academic,creval_winrate,180,0,,,,
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,essay,creval_winrate,180,0,,,,
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,narrative,creval_winrate,180,0,,,,
+main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,poetry,creval_winrate,180,0,,,,
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,academic,creval_winrate,180,0,,,,
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,essay,creval_winrate,180,0,,,,
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,narrative,creval_winrate,180,0,,,,
+main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,poetry,creval_winrate,180,0,,,,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,academic,creval_winrate,180,0,,,,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,essay,creval_winrate,180,0,,,,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,narrative,creval_winrate,180,0,,,,
+main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,poetry,creval_winrate,180,0,,,,

@@ -1,0 +1,5 @@
+generator_label,metrics_file,generator_model,outcome,n,fit_type,beta_d,beta_d2,p_d,p_d2,d_star,d2_significant_p05,error
+Qwen3-4B,main_qwen3_4b_metrics.jsonl,gen_qwen3_4b,creval_winrate_score,0,,,,,,,False,no_data_after_dropna
+Qwen3-8B,main_qwen3_8b_metrics.jsonl,gen_qwen3_8b,creval_winrate_score,0,,,,,,,False,no_data_after_dropna
+Qwen3-14B,main_qwen3_14b_metrics.jsonl,gen_qwen3_14b,creval_winrate_score,0,,,,,,,False,no_data_after_dropna
+GPT-4o,main_metrics.jsonl,gen_openai_4o|gen_openai_mini,creval_winrate_score,0,,,,,,,False,no_data_after_dropna

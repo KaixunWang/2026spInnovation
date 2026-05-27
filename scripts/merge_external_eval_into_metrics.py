@@ -43,6 +43,7 @@ ALIGN_KEYS = (
     "hop_index",
     "path_id",
     "target_persona",
+    "prompt_variant",
 )
 
 
@@ -70,6 +71,7 @@ def _row_key(row: dict[str, Any]) -> tuple[Any, ...]:
         row.get("hop_index"),
         row.get("path_id"),
         row.get("target_persona"),
+        row.get("prompt_variant"),
     )
 
 

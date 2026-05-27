@@ -3,3 +3,17 @@ innovation_upload.tar.gz
 .venv/
 venv/
 models/
+.conda/
+*.dat
+*.pyc
+offload/
+*.aux
+*.log
+*.out
+*.toc
+*.gz
+.vscode/
+.claude/
+creval_server_package/
+*.txt
+*.sh
