@@ -107,6 +107,7 @@
 \title[Conflict as Structural Stress in LLM Cross-Personality Rewriting]{Conflict as Structural Stress in LLM Cross-Personality Rewriting}
 
 \author{Kaixun Wang}
+\author{Xuyang Liu}
 \affiliation{
   \institution{Southern University of Science and Technology}
   \city{Shenzhen}
@@ -122,6 +123,7 @@ The pooled sample comprises \textbf{4716} rows (two main arms, mechanism \textbf
 Separately, open-source \textbf{Qwen3-4B/8B/14B} replications on the same discrete T3 protocol each show significantly negative quadratic curvature on $C_{\mathrm{auto}}$ vs.\ $d_H$ under the \textbf{same Gaussian mixed-effects specification} as Table~\ref{tab:scale_regression} (genre fixed effects with source-level random intercepts; $n{=}720$ T3 rows per checkpoint: $\beta_{d^2}{=}{-}0.641$, $-0.744$, $-0.432$, respectively, all $p{<}10^{-3}$).
 Figure~\ref{fig:scale_inverted_u} is a \textbf{visual supplement only}: it overlays genre-averaged \emph{OLS} predicted curves on the same Qwen rows to sketch shape and hybrid bands; those OLS vertices are not re-used as the primary inferential estimand and need not coincide numerically with the MixedLM $d^\ast$ column in Table~\ref{tab:scale_regression}.
 The judge-composite analogue appears in Figure~\ref{fig:scale_inverted_u_judge}.
+A data-driven \textbf{Space-L} (SBERT$\to$PCA, Procrustes to Space-H) recovers the same $S{\times}R$ layout (Figure~\ref{fig:space_l_validation}); H7 regressions on $d_L$ keep negative $\beta_{d^2}$ at all Qwen checkpoints, so main analyses use $d_H$.
 \end{abstract}
 
 \keywords{AI writing, persona prompting, creativity evaluation, style transfer, structural stress, LLM-as-judge, mixed-effects regression}
@@ -163,6 +165,22 @@ Figure~\ref{fig:coord_space_h} plots all corpus sources in $(S,R)$ by genre unde
 \end{figure}
 
 Scalar conflict $d_H$ and directional $\Delta_H=(\Delta S,\Delta R)$ are computed from these vectors (Euclidean $d_H$ after the project's normalization).
+
+\subsection{Space-L validation (learned embedding space)}
+
+\textbf{Space-L} tests whether the hand-crafted Space-H corners are recoverable from text: per persona we generate $\geq 200$ reference passages (GPT-4o / GPT-4o mini), embed with SBERT, PCA to $k{=}2$, and Procrustes-align to the four H persona vectors (\texttt{build\_space\_l}).
+Figure~\ref{fig:space_l_validation} summarises the result.
+\textbf{Left:} aligned persona layouts in H vs.\ L (Procrustes disparity $0.017$; cross-generator disparity $0.004$).
+\textbf{Right:} H7 robustness---T3 MixedLM $\beta_{d^2}$ on $C_{\mathrm{auto}}$ stays negative for $d_H$ (Table~\ref{tab:scale_regression}) and for learned conflict $d_L$ on all Qwen3 checkpoints ($n{=}720$ each).
+PC1 tracks register $R$ ($|r|{=}0.995$), PC2 tracks $S$ ($r{=}0.989$); PCA explains $\approx$88\% centroid variance.
+Main regressions, prompts, and CrEval matching therefore use \textbf{$d_H$}; Space-L is a confirmatory geometry check, not a second primary estimand.
+
+\begin{figure}[t]
+\centering
+\maybeincludegraphics{figures/space_l_validation.png}{Space-L Procrustes alignment and H7 curvature comparison.}
+\caption{Space-L validation. \emph{Left:} four persona prototypes after Procrustes alignment (RC/EC/RA/EA). \emph{Right:} T3-only MixedLM $\beta_{d^2}$ on $C_{\mathrm{auto}}$ using $d_H$ vs.\ $d_L$ (Qwen3; all $p{<}10^{-3}$ on $d_L$). Built from cached \texttt{.cache/space\_l/}; reproduce with \texttt{scripts/plot\_space\_l\_validation.py}.}
+\label{fig:space_l_validation}
+\end{figure}
 
 \subsection{Main Arms: Discrete and Continuous Targets}
 
@@ -668,6 +686,7 @@ Multihop effects are \textbf{genre-dependent}. Essay rows show multihop strictly
 \item The ``\textbf{capacity threshold}'' language for Qwen3-14B (judge curvature turning significantly positive while automatic curvature stays significantly negative on the \emph{same} rows) is a \textbf{post hoc descriptive} reading of two fitted slopes at one model size, not an independently identified causal capacity parameter.
 \item Appendix~\ref{app:collapse} reports a binomial GEE on sample-defined collapse cut-offs (not a calibrated GLMM); treat as exploratory triangulation, not as an absolute failure probability.
 \item H1 OLS $p(d^2)$ for Qwen3-14B is borderline at the conventional $0.05$ threshold ($p{\approx}0.049$) even though the MixedLM fit in Table~\ref{tab:scale_regression} is highly significant; readers should treat the vertex location as robust but the OLS $p$-value as estimator-sensitive.
+\item Space-L reference text uses \textbf{GPT-4o / GPT-4o mini} only; H7 applies the cached L geometry to Qwen3 rewrites (Figure~\ref{fig:space_l_validation}).
 \item The CrEval analysis is restricted to the discrete-main \texttt{repeat\_idx}{=}0 slice ($n{=}1680$ rows, 960 T3 rows), not the full 4716-row proprietary pooled sample nor the full 3420-row Qwen replication; its coefficients should therefore be read as a \textbf{matched-slice triangulation}, not as a replacement for the main pooled estimands.
 \item CrEval win-rates are tournament-relative: each rewrite is scored against the observed pool of same-source opponents, mixing generators of different capacity inside one competition graph. This improves pairwise calibration but makes absolute levels \textbf{sample-dependent}.
 \item Per-generator CrEval regressions on the matched T3 slice use OLS over $n{=}240$ rows per model because mixed-effects fits are numerically unstable in this narrow subset; Table~\ref{tab:creval_t3_quadratic} should therefore be read as a descriptive curvature check rather than as a new primary inferential table.
@@ -679,6 +698,7 @@ Cross-persona conflict behaves as \textbf{structural stress}: it does \emph{not}
 Exploratory variability traces (Figure~\ref{fig:variability}) show sentiment displacement rising into mid-to-high conflict bins and the sentence-order score dipping through mid bins, consistent with more aggressive reordering co-occurring with the value/coherence erosion channel.
 Directionally, $\Delta S$, $\Delta R^2$, and $\Delta S\Delta R$ remain central (Table~\ref{tab:direction}). On mechanism prompts over shared high-$d$ cells, mean $C_{\mathrm{auto}}$ orders M1${>}$M3${>}$M2${>}$M0 (Table~\ref{tab:condition}), a descriptive answer to ``which bundle works best'' within this arm.
 The open-source \textbf{Qwen3-4B/8B/14B} runs reproduce the same qualitative story at three scales: significant negative quadratic curvature on $C_{\mathrm{auto}}$ vs.\ $d_H$ with fitted vertices near $d^\ast{\approx}0.46$--$0.53$ (Table~\ref{tab:scale_regression}; Figure~\ref{fig:scale_inverted_u}; judge-channel analogue Figure~\ref{fig:scale_inverted_u_judge}).
+Space-L Procrustes alignment and H7 $d_L$ checks confirm the same negative $\beta_{d^2}$ story (Figure~\ref{fig:space_l_validation}).
 At Qwen3-14B and on the proprietary GPT pool, $C_{\mathrm{judge}}$ bends upward along $d_H$ while $C_{\mathrm{auto}}$ bends downward on the same rows (Table~\ref{tab:judge_auto_divergence}), even though both composites correlate positively at the row level (Table~\ref{tab:validity_corr}).
 Treat all claims as conditional on branch (main vs.\ mechanism vs.\ multihop), sampling mode, and the narrow mechanism sample size.
 
