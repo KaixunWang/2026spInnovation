@@ -138,7 +138,7 @@ The open-source Qwen3 replication contributes an additional $3{\times}1140=3420$
 Mixed-effects regressions use all rows with finite conflict scalar $d_H$ and finite outcomes on each dependent variable (hence $n{=}4620$ for headline automatic creativity on the proprietary pooled regression sample, fewer than 4716 when some rows lack finite $d_H$ or outcomes).
 
 \paragraph{Interpretive frame (structural stress).}
-Rather than treating conflict as a homogeneous creativity elevator, we emphasize \textbf{dimensional splitting}: the same stressor can elevate novelty-like signals while eroding value and coherence support for $C_{\mathrm{auto}}{=}N_{\mathrm{auto}}{\cdot}V_{\mathrm{auto}}$, consistent with creativity theories that distinguish generative fluency from evaluative constraint~\cite{boden} and with dual-process accounts that separate rapid associative production from slower monitoring of consistency and judgment~\cite{kahneman}.
+Rather than treating conflict as a homogeneous creativity elevator, we emphasize \textbf{dimensional splitting}: the same stressor can elevate novelty-like signals while eroding value and coherence support for $C_{\mathrm{auto}}{=}N_{\mathrm{auto}}{\cdot}V_{\mathrm{auto}}$, consistent with componential and divergent-thinking accounts of creativity~\cite{boden,amabile1983,guilford1967,runco} and with dual-process accounts that separate rapid associative production from slower monitoring of consistency and judgment~\cite{kahneman,mednick1962}.
 Under this reading, an interior optimum near $d^\ast{\approx}0.47$ (Table~\ref{tab:h1}) marks a \textbf{medium-conflict} regime where rewriting remains productive before coherence/value penalties steepen---not an endorsement of maximal persona distance.
 
 \section{Experimental Design}
@@ -151,7 +151,7 @@ Full rewrite and judge prompt templates, automatic-metric formulas, supplementar
 Space-H maps each source to $(S,R)\in[-1,1]^2$: increasing $S$ toward $+1$ indicates more analytic, System-2-like prose (toward $-1$, more intuitive and affective); increasing $R$ toward $+1$ indicates a more adventurous register, toward $-1$ a more conservative one. Persona prototypes carry fixed coordinates, and rewrite rows inherit conflict from the source--target pair.
 
 \paragraph{Mapping sources into Space-H.}
-The default pipeline uses \textbf{deterministic HuggingFace probes} (no LLM sampling): $S$ clips $(f{-}e)$ where $f$ is a RoBERTa formality probability and $e$ is non-neutral emotion mass from a DistilRoBERTa emotion classifier; $R$ is the dot product of a StyleDistance sentence embedding with a fixed unit axis loaded from precomputed axis vectors (so register contrast is geometric rather than hand-labelled). An alternate configuration uses an LLM coordinate scorer that returns JSON $(S,R)$ on a 1--5 scale, averaged over repeated seeds with spread retained as a stability diagnostic---both backends normalize to $[-1,1]$ before conflict computation.
+The default pipeline uses \textbf{deterministic HuggingFace probes} (no LLM sampling): $S$ clips $(f{-}e)$ where $f$ is a RoBERTa formality probability~\cite{brooke2020} and $e$ is non-neutral emotion mass from a DistilRoBERTa emotion classifier~\cite{hartmann2020}; $R$ is the dot product of a StyleDistance sentence embedding~\cite{patel2024} with a fixed unit axis loaded from precomputed axis vectors (so register contrast is geometric rather than hand-labelled). An alternate configuration uses an LLM coordinate scorer that returns JSON $(S,R)$ on a 1--5 scale, averaged over repeated seeds with spread retained as a stability diagnostic---both backends normalize to $[-1,1]$ before conflict computation.
 
 \paragraph{Reliability and genre structure.}
 Coordinates are screened with a \textbf{genre-separation diagnostic}: per-genre means and standard deviations of $S$ and $R$, pairwise Euclidean distances between genre centroids in $(S,R)$, and one-way ANOVA plus Kruskal--Wallis tests for differences in $S$ and $R$ across genres. These checks justify treating Space-H as an ordinal scaffold for conflict rather than as a literal psychometric scale; absolute distances should still be interpreted cautiously.
@@ -168,7 +168,7 @@ Scalar conflict $d_H$ and directional $\Delta_H=(\Delta S,\Delta R)$ are compute
 
 \subsection{Space-L validation (learned embedding space)}
 
-\textbf{Space-L} tests whether the hand-crafted Space-H corners are recoverable from text: per persona we generate $\geq 200$ reference passages (GPT-4o / GPT-4o mini), embed with SBERT, PCA to $k{=}2$, and Procrustes-align to the four H persona vectors (\texttt{build\_space\_l}).
+\textbf{Space-L} tests whether the hand-crafted Space-H corners are recoverable from text: per persona we generate $\geq 200$ reference passages (GPT-4o / GPT-4o mini~\cite{openai2024}), embed with SBERT~\cite{reimers2019,xiao2023}, PCA to $k{=}2$, and Procrustes-align~\cite{gower1975} to the four H persona vectors (\texttt{build\_space\_l}).
 Figure~\ref{fig:space_l_validation} summarises the result.
 \textbf{Left:} aligned persona layouts in H vs.\ L (Procrustes disparity $0.017$; cross-generator disparity $0.004$).
 \textbf{Right:} H7 robustness---T3 MixedLM $\beta_{d^2}$ on $C_{\mathrm{auto}}$ stays negative for $d_H$ (Table~\ref{tab:scale_regression}) and for learned conflict $d_L$ on all Qwen3 checkpoints ($n{=}720$ each).
@@ -215,17 +215,17 @@ Total pooled & 4716 & 240 & 1440 / 1440 & 2880 T3, 60 mech, 96 mh.\\
 \end{figure}
 
 \paragraph{Open-source small-model replication arm.}
-Three \textbf{Qwen3} checkpoints (4B, 8B, 14B) are served through a local deployment and run the \emph{same} discrete main-arm protocol (T0--T3, joint mode, identical prompts and row schema) as the proprietary-generator arms; all downstream metric computation, judging, merging, and analysis use the same pipeline so that cross-scale comparisons isolate generator capacity rather than preprocessing differences. Each Qwen checkpoint contributes 1140 rows (T0=60, T1=180, T2=180, T3=720), with the T3 block driving the regressions in Tables~\ref{tab:scale_regression}--\ref{tab:judge_auto_divergence}.
+Three \textbf{Qwen3}~\cite{qwen2025} checkpoints (4B, 8B, 14B) are served through a local deployment and run the \emph{same} discrete main-arm protocol (T0--T3, joint mode, identical prompts and row schema) as the proprietary-generator arms; all downstream metric computation, judging, merging, and analysis use the same pipeline so that cross-scale comparisons isolate generator capacity rather than preprocessing differences. Each Qwen checkpoint contributes 1140 rows (T0=60, T1=180, T2=180, T3=720), with the T3 block driving the regressions in Tables~\ref{tab:scale_regression}--\ref{tab:judge_auto_divergence}.
 
 \section{Measurement Model}
 
 \subsection{Automatic novelty $N_{\mathrm{auto}}$}
 
-$N_{\mathrm{auto}}$ is the equal-weight mean of three \textbf{genre-relative} channels, each mapped to $[0,1]$ after comparing the rewrite to statistics of \emph{source texts in the same genre}: (i)~distinct-2 type-token ratio vs.\ genre mean/variance; (ii)~bigram novelty rate vs.\ typical intra-genre overlap; (iii)~optional SBERT-based $1{-}$cosine distance vs.\ mean pairwise embedding distance within the genre (this channel is informative only when embedding computation is enabled). Z-score--style clipping stabilizes outliers before rebinding to $[0,1]$. The design deliberately removes genre-wide verbosity confounds that would otherwise make poetry appear ``novel'' by construction.
+$N_{\mathrm{auto}}$ is the equal-weight mean of three \textbf{genre-relative} channels, each mapped to $[0,1]$ after comparing the rewrite to statistics of \emph{source texts in the same genre}: (i)~distinct-2 type-token ratio~\cite{guilford1967} vs.\ genre mean/variance; (ii)~bigram novelty rate vs.\ typical intra-genre overlap; (iii)~optional SBERT-based~\cite{reimers2019,xiao2023} $1{-}$cosine distance vs.\ mean pairwise embedding distance within the genre (this channel is informative only when embedding computation is enabled). Z-score--style clipping stabilizes outliers before rebinding to $[0,1]$. The design deliberately removes genre-wide verbosity confounds that would otherwise make poetry appear ``novel'' by construction.
 
 \subsection{Automatic value $V_{\mathrm{auto}}$}
 
-Let entailment be the probability of natural-language inference \emph{entailment} from source premise to generated hypothesis (cross-encoder MNLI). Let coherence be GPT-2 perplexity of the rewrite mapped monotonically to $[0,1]$ (inverse perplexity proxy for fluency). The primary value scalar is the \textbf{arithmetic mean} of entailment and coherence. A geometric mean variant $\sqrt{e\cdot c}$ is computed for robustness tables only.
+Let entailment be the probability of natural-language inference \emph{entailment} from source premise to generated hypothesis (cross-encoder MNLI~\cite{williams2018}). Let coherence be GPT-2~\cite{radford2019} perplexity of the rewrite mapped monotonically to $[0,1]$ (inverse perplexity proxy for fluency). The primary value scalar is the \textbf{arithmetic mean} of entailment and coherence. A geometric mean variant $\sqrt{e\cdot c}$ is computed for robustness tables only.
 
 \subsection{Automatic creativity $C_{\mathrm{auto}}$}
 
@@ -233,13 +233,13 @@ Primary automatic creativity is the \textbf{product}
 \[
   C_{\mathrm{auto}} = N_{\mathrm{auto}}\, V_{\mathrm{auto}},
 \]
-clipped so both factors lie in $[0,1]$ beforehand. Multiplication encodes a conjunctive requirement: high scores need both divergence from the source \emph{and} retention of propositional/fluency support---consistent with definitions that treat creativity as combining originality with acceptable usefulness~\cite{runco}. An additive composite would reward dominance on one axis alone and blur interpretation when novelty and value move against each other under conflict.
+clipped so both factors lie in $[0,1]$ beforehand. Multiplication encodes a conjunctive requirement: high scores need both divergence from the source \emph{and} retention of propositional/fluency support---consistent with definitions that treat creativity as combining originality with acceptable usefulness~\cite{runco,amabile1983}. An additive composite would reward dominance on one axis alone and blur interpretation when novelty and value move against each other under conflict.
 
 Pooling therefore lets novelty and value/coherence move in opposite directions under rising $d_H$, producing the split documented in Table~\ref{tab:quadratic}.
 
 \subsection{LLM-as-judge (validity arm)}
 
-Absolute judging uses a fixed rubric: seven Likert dimensions (novelty, surprise, imagery, fidelity, fluency, consistency, logical completeness) with strict JSON outputs on a 1--5 scale; each generation is scored independently relative to the source and genre. \textbf{Dual judges} are used in this study---OpenAI GPT-4o and a non-reasoning DeepSeek-Chat endpoint (DeepSeek thinking mode explicitly disabled at the API layer to keep all tokens in the JSON message and to eliminate the empty-content failures that were observed on the earlier V4-Pro reasoning route)---spanning distinct provider families rather than repeated calls to the same endpoint. Per-dimension scores are averaged across judges with successful parses. A pairwise creative-comparison prompt is implemented for head-to-head evaluation with randomized option order, but the merged analysis emphasises the absolute branch for stable row-wise fields. Aggregated judge novelty pools novelty-type dimensions; weak correlation with $C_{\mathrm{auto}}$ at the row level ($r{\approx}0.20$; Table~\ref{tab:validity_corr}) signals partial construct divergence between human-like rubric novelty and the automatic NLI$\times$perplexity definition rather than ``failure'' of either side in isolation.
+Absolute judging uses a fixed rubric: seven Likert dimensions (novelty, surprise, imagery, fidelity, fluency, consistency, logical completeness) with strict JSON outputs on a 1--5 scale; each generation is scored independently relative to the source and genre, following the LLM-as-judge paradigm~\cite{zheng2023}. \textbf{Dual judges} are used in this study---OpenAI GPT-4o~\cite{openai2024} and a non-reasoning DeepSeek-Chat endpoint~\cite{deepseek2025} (DeepSeek thinking mode explicitly disabled at the API layer to keep all tokens in the JSON message and to eliminate the empty-content failures that were observed on the earlier V4-Pro reasoning route)---spanning distinct provider families rather than repeated calls to the same endpoint. Per-dimension scores are averaged across judges with successful parses. A pairwise creative-comparison prompt is implemented for head-to-head evaluation with randomized option order, but the merged analysis emphasises the absolute branch for stable row-wise fields. Aggregated judge novelty pools novelty-type dimensions; weak correlation with $C_{\mathrm{auto}}$ at the row level ($r{\approx}0.20$; Table~\ref{tab:validity_corr}) signals partial construct divergence between human-like rubric novelty and the automatic NLI$\times$perplexity definition rather than ``failure'' of either side in isolation.
 
 Judge fields are merged into the analysis table for validity checks; they \textbf{do not} replace $C_{\mathrm{auto}}$ as the prespecified primary outcome.
 
@@ -328,7 +328,7 @@ To add a third evaluation channel, we score a \textbf{matched discrete-main subs
 
 The scored slice uses one canonical rewrite per condition-target cell (\texttt{repeat\_idx}{=}0) from the discrete main arm: $n{=}1680$ rewrites in total across GPT-4o and Qwen3-4B/8B/14B. For each of the 60 source texts, all available rewrites are placed into a \textbf{round-robin tournament}: every distinct pair is judged exactly once, with response order randomized independently per comparison to suppress left--right positional bias. This yields \textbf{22,680} pairwise decisions overall, with each rewrite facing exactly 27 opponents.
 
-Implementation follows the public CrEval release (Qwen2.5-7B-Instruct base with the CrEval-7b LoRA adapter served through a LLaMA-Factory OpenAI-compatible API)~\cite{cao2025creval,creval_repo}. The model returns one of three outcomes for each pair: response 1 preferred, response 2 preferred, or tie. We convert these into a win-rate
+Implementation follows the public CrEval release (Qwen2.5-7B-Instruct~\cite{qwen2025} base with the CrEval-7b LoRA adapter served through a LLaMA-Factory OpenAI-compatible API~\cite{llamafactory2024,cao2025creval,creval_repo}). The model returns one of three outcomes for each pair: response 1 preferred, response 2 preferred, or tie. We convert these into a win-rate
 \[
   C_{\mathrm{creval}} = \frac{\mathrm{wins} + 0.5\,\mathrm{ties}}{n_{\mathrm{comparisons}}},
 \]
@@ -435,7 +435,7 @@ The pooled quadratic models regress each outcome on linear and quadratic conflic
 \[
   y \sim d_H + d_H^2 + \sum_g \mathbf{1}_{\mathrm{genre}=g} + \sum_c \mathbf{1}_{\mathrm{condition}=c}.
 \]
-Observations are rewrite-level rows; \textbf{random intercepts group by source text}, reflecting repeated generations from the same corpus item without nesting random effects in persona identity. Condition absorbs arm contrasts (T0--T3, mechanism modes, multihop structure as coded); persona distance enters through $d_H$ and directional regressors rather than as an extra random classification. Mixed linear models are used when variance-component estimation is numerically stable; otherwise the same fixed-effects structure is estimated by OLS. In sparse designs the estimated source-level variance may collapse toward zero, so $\beta_{d^2}$ should be read as a pooled association that partly marginalizes within-source correlation rather than as a nested hierarchical causal estimand.
+Observations are rewrite-level rows; \textbf{random intercepts group by source text}, reflecting repeated generations from the same corpus item without nesting random effects in persona identity. Condition absorbs arm contrasts (T0--T3, mechanism modes, multihop structure as coded); persona distance enters through $d_H$ and directional regressors rather than as an extra random classification. Gaussian mixed linear models~\cite{bates2015} are used when variance-component estimation is numerically stable; otherwise the same fixed-effects structure is estimated by OLS. In sparse designs the estimated source-level variance may collapse toward zero, so $\beta_{d^2}$ should be read as a pooled association that partly marginalizes within-source correlation rather than as a nested hierarchical causal estimand.
 Directional regressions swap $(d_H,d_H^2)$ for $(\Delta S,\Delta R)$ plus squares, product, and Euclidean $|\Delta_H|$, retaining the same genre/condition fixed effects and source-level intercept grouping.
 
 \subsection{Pooled Quadratic Results}
@@ -603,7 +603,7 @@ High & 0.3591 & 0.3146 & 0.3068 \\
 \label{tab:causal}
 \end{table}
 
-On the \textbf{Qwen3} replications, the H6 mid-bin contrast $C_{\mathrm{auto}}^{T3}{-}C_{\mathrm{auto}}^{T2}$ is again \emph{near zero} on 4B ($-0.0016$) and 8B ($-0.0041$), but turns \textbf{slightly positive} on 14B ($+0.0039$), a small-scale reversal that does not overturn the proprietary pattern but hints that the largest checkpoint may occasionally edge out the random-persona placebo in the mid-$d_H$ band. For H5, JSD-curvature on $C_{\mathrm{auto}}$ is non-significant on 4B ($p{\approx}0.41$) and negatively curved on 8B ($\beta_{\mathrm{JSD}^2}{\approx}{-}7.07$, $p{\approx}0.017$), and again non-significant on 14B ($p{\approx}0.88$). Directed T3 persona choice does not deliver incremental gains over the T2 placebo within fixed $d_H$ bins on any Qwen scale at conventional thresholds, paralleling the proprietary pattern. We continue to report this as a substantive empirical finding rather than as a methodological defect.
+On the \textbf{Qwen3} replications, the H6 mid-bin contrast $C_{\mathrm{auto}}^{T3}{-}C_{\mathrm{auto}}^{T2}$ is again \emph{near zero} on 4B ($-0.0016$) and 8B ($-0.0041$), but turns \textbf{slightly positive} on 14B ($+0.0039$), a small-scale reversal that does not overturn the proprietary pattern but hints that the largest checkpoint may occasionally edge out the random-persona placebo in the mid-$d_H$ band. For H5, Jensen--Shannon divergence~\cite{lin1991} curvature on $C_{\mathrm{auto}}$ is non-significant on 4B ($p{\approx}0.41$) and negatively curved on 8B ($\beta_{\mathrm{JSD}^2}{\approx}{-}7.07$, $p{\approx}0.017$), and again non-significant on 14B ($p{\approx}0.88$). Directed T3 persona choice does not deliver incremental gains over the T2 placebo within fixed $d_H$ bins on any Qwen scale at conventional thresholds, paralleling the proprietary pattern. We continue to report this as a substantive empirical finding rather than as a methodological defect.
 
 \paragraph{Structural tail check (appendix).}
 The automatic-channel deterioration under high conflict is already conveyed by $C_{\mathrm{auto}}$, NLI, and coherence slopes in the main tables.
@@ -677,7 +677,7 @@ Poetry & High & 0.3704 & 0.3512 & 0.0192 \\
 \label{tab:multihop}
 \end{table}
 
-Multihop effects are \textbf{genre-dependent}. Essay rows show multihop strictly above direct T3 in every $d$ bin (all positive deltas), suggesting smoother persona paths help that register here. Academic rows reverse under mid conflict (delta ${\approx}{-}0.07$), while low/high bins are mixed or modest---so gradual hops are not universally preferable and should be evaluated per genre and conflict band.
+Multihop effects are \textbf{genre-dependent}~\cite{simonton1999}. Essay rows show multihop strictly above direct T3 in every $d$ bin (all positive deltas), suggesting smoother persona paths help that register here. Academic rows reverse under mid conflict (delta ${\approx}{-}0.07$), while low/high bins are mixed or modest---so gradual hops are not universally preferable and should be evaluated per genre and conflict band.
 
 \section{Limitations}
 
@@ -757,7 +757,8 @@ Qwen3-4B & $+1.096$ & 0.131 & $+0.382$ & 0.395 & $+0.030$ & 0.878 \\
 \appendix
 \input{appendix_cross_personality_20260509.tex}
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
+
 \bibitem{kahneman}
 D.~Kahneman.
 \newblock \textit{Thinking, Fast and Slow}.
@@ -768,10 +769,105 @@ M.~Boden.
 \newblock \textit{The Creative Mind: Myths and Mechanisms}.
 \newblock Routledge, 2004.
 
+\bibitem{amabile1983}
+T.~Amabile.
+\newblock \textit{The Social Psychology of Creativity}.
+\newblock Springer, 1983.
+
+\bibitem{guilford1967}
+J.~P.~Guilford.
+\newblock \textit{The Nature of Human Intelligence}.
+\newblock McGraw-Hill, 1967.
+
+\bibitem{mednick1962}
+S.~A.~Mednick.
+\newblock The associative basis of the creative process.
+\newblock \textit{Psychological Review} 69, 3 (1962), 220--227.
+
 \bibitem{runco}
 M.~Runco and G.~Jaeger.
 \newblock The standard definition of creativity.
 \newblock \textit{Creativity Research Journal} 24, 1 (2012), 92--96.
+
+\bibitem{simonton1999}
+D.~K.~Simonton.
+\newblock \textit{Origins of Genius: Darwinian Perspectives on Creativity}.
+\newblock Oxford University Press, 1999.
+
+\bibitem{brooke2020}
+J.~Brooke and G.~Hirst.
+\newblock Native Language Identification and Formality.
+\newblock In \textit{Proceedings of LREC 2020}, 6082--6092.
+
+\bibitem{hartmann2020}
+J.~Hartmann, S.~Sonnabend, and A.~Nevrkla.
+\newblock Emotion English DistilRoBERTa-base.
+\newblock Hugging Face model card, 2020.
+
+\bibitem{patel2024}
+A.~Patel, J.~Zhu, J.~Qiu, Z.~Horvitz, M.~Apidianaki, K.~McKeown, and C.~Callison-Burch.
+\newblock StyleDistance: Stronger Content-Independent Style Embeddings with Synthetic Parallel Examples.
+\newblock \textit{arXiv preprint arXiv:2410.12757}, 2024.
+
+\bibitem{reimers2019}
+N.~Reimers and I.~Gurevych.
+\newblock Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks.
+\newblock In \textit{Proceedings of EMNLP-IJCNLP 2019}, 3982--3992.
+
+\bibitem{xiao2023}
+S.~Xiao, Z.~Liu, P.~Zhang, and X.~Mu.
+\newblock C-Pack: Packaged Resources To Advance General Chinese Embedding.
+\newblock \textit{arXiv preprint arXiv:2309.07597}, 2023.
+
+\bibitem{gower1975}
+J.~C.~Gower.
+\newblock Generalized procrustes analysis.
+\newblock \textit{Psychometrika} 40, 1 (1975), 33--51.
+
+\bibitem{openai2024}
+OpenAI.
+\newblock GPT-4o System Card.
+\newblock Technical report, OpenAI, 2024.
+
+\bibitem{deepseek2025}
+DeepSeek-AI.
+\newblock DeepSeek-V3 Technical Report.
+\newblock \textit{arXiv preprint arXiv:2412.19437}, 2024.
+
+\bibitem{qwen2025}
+Qwen Team.
+\newblock Qwen3 Technical Report.
+\newblock \textit{arXiv preprint arXiv:2505.09388}, 2025.
+
+\bibitem{williams2018}
+A.~Williams, N.~Nangia, and S.~Bowman.
+\newblock A Broad-Coverage Challenge Corpus for Sentence Understanding through Inference.
+\newblock In \textit{Proceedings of NAACL 2018}, 1112--1122.
+
+\bibitem{radford2019}
+A.~Radford, J.~Wu, R.~Child, D.~Luan, D.~Amodei, and I.~Sutskever.
+\newblock Language Models are Unsupervised Multitask Learners.
+\newblock OpenAI technical report, 2019.
+
+\bibitem{zheng2023}
+L.~Zheng, W.-L.~Chiang, Y.~Sheng, et al.
+\newblock Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.
+\newblock In \textit{Advances in Neural Information Processing Systems 36 (NeurIPS 2023)}.
+
+\bibitem{llamafactory2024}
+Y.~Zheng, R.~Zhang, J.~Zhang, et al.
+\newblock LLaMA-Factory: Unified Efficient Fine-Tuning of 100+ LLMs.
+\newblock In \textit{Proceedings of ACL 2024 (System Demonstrations)}, 400--410.
+
+\bibitem{bates2015}
+D.~Bates, M.~M\"achler, B.~Bolker, and S.~Walker.
+\newblock Fitting Linear Mixed-Effects Models Using \texttt{lme4}.
+\newblock \textit{Journal of Statistical Software} 67, 1 (2015), 1--48.
+
+\bibitem{lin1991}
+J.~Lin.
+\newblock Divergence measures based on the Shannon entropy.
+\newblock \textit{IEEE Transactions on Information Theory} 37, 1 (1991), 145--151.
 
 \bibitem{cao2025creval}
 Q.~Cao, X.~Wang, Y.~Yuan, Y.~Liu, F.~Luo, and R.~Song.
@@ -792,6 +888,7 @@ C.~Wang, Z.~Chen, Y.~Wei, T.~Jiang, X.~Wu, F.~Li, W.~Zuo, and H.~Yao.
 R.~Yerkes and J.~Dodson.
 \newblock The relation of strength of stimulus to rapidity of habit-formation.
 \newblock \textit{Journal of Comparative Neurology and Psychology} 18 (1908), 459--482.
+
 \end{thebibliography}
 
 \end{document}
